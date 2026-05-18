@@ -1,7 +1,7 @@
 import type { MouseEvent } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { destroyEditorInstance } from "@/lib/editorInstances";
+import { disposeTabEditor } from "@/lib/editorInstances";
 import { useEditorStore } from "@/stores/editorStore";
 import { useTabStore } from "@/stores/tabStore";
 
@@ -14,7 +14,7 @@ export function TabBar(): JSX.Element {
 
   const handleClose = (id: string, e: MouseEvent): void => {
     e.stopPropagation();
-    destroyEditorInstance(id);
+    disposeTabEditor(id);
     removeMeta(id);
     closeTab(id);
   };

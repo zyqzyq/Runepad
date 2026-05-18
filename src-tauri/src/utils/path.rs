@@ -6,7 +6,7 @@ fn is_blocked_path(path: &Path) -> bool {
         return true;
     }
     if let Ok(exe) = std::env::current_exe() {
-        if let Ok(exe_dir) = exe.parent() {
+        if let Some(exe_dir) = exe.parent() {
             if path.starts_with(exe_dir) {
                 return true;
             }

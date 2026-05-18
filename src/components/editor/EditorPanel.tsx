@@ -38,7 +38,6 @@ export function EditorPanel({ docId, isActive }: EditorPanelProps): JSX.Element 
     if (!parent) return;
 
     const initialDoc = pendingInitialDocs.get(docId) ?? "";
-    pendingInitialDocs.delete(docId);
 
     const updateMeta = (view: EditorView): void => {
       const pos = view.state.selection.main.head;

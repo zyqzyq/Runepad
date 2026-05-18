@@ -2,10 +2,7 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 import { openDialog, readFile, saveDialog, writeFile } from "@/api/fileApi";
 import { basename, languageFromFilename } from "@/lib/languageFromFilename";
-import {
-  destroyEditorInstance,
-  editorInstances,
-} from "@/lib/editorInstances";
+import { disposeTabEditor, editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 import { useEditorStore } from "@/stores/editorStore";
 import { useTabStore } from "@/stores/tabStore";
@@ -114,7 +111,7 @@ export function useFileActions(): {
 
   const closeActiveTab = useCallback(() => {
     if (!activeId) return;
-    destroyEditorInstance(activeId);
+    disposeTabEditor(activeId);
     removeMeta(activeId);
     closeTab(activeId);
   }, [activeId, closeTab, removeMeta]);
