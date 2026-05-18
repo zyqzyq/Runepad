@@ -14,9 +14,10 @@ pub fn get_system_theme() -> Result<String, String> {
             .map_err(|e| format!("Failed to read system theme: {e}"))?;
         let stdout = String::from_utf8_lossy(&output.stdout);
         if stdout.contains("0x0") {
-            return Ok("dark".to_string());
+            Ok("dark".to_string())
+        } else {
+            Ok("light".to_string())
         }
-        return Ok("light".to_string());
     }
 
     #[cfg(not(target_os = "windows"))]

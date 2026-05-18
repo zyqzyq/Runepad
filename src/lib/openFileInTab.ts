@@ -2,6 +2,7 @@ import { readFile } from "@/api/fileApi";
 import { basename, languageFromFilename } from "@/lib/languageFromFilename";
 import { normalizePath } from "@/lib/normalizePath";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
+import { useRecentFilesStore } from "@/stores/recentFilesStore";
 import { useTabStore } from "@/stores/tabStore";
 
 export async function openFileInTab(path: string): Promise<void> {
@@ -28,4 +29,5 @@ export async function openFileInTab(path: string): Promise<void> {
     lineEnding,
     language,
   });
+  useRecentFilesStore.getState().push(path);
 }

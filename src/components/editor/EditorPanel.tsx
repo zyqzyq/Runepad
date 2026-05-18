@@ -1,5 +1,6 @@
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-import { Compartment, EditorState, type Extension } from "@codemirror/state";
+import { search, searchKeymap } from "@codemirror/search";
+import { Compartment, EditorState, Prec, type Extension } from "@codemirror/state";
 import {
   drawSelection,
   EditorView,
@@ -10,6 +11,7 @@ import {
 import { useEffect, useRef } from "react";
 import { getCodemirrorTheme } from "@/lib/codemirrorTheme";
 import { getLanguageExtension } from "@/lib/codemirrorLanguages";
+import { closeFindPanelIfOpen, toggleFindPanel } from "@/lib/editorSearch";
 import { destroyEditorInstance, editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 import { useEditorStore } from "@/stores/editorStore";
@@ -70,7 +72,20 @@ export function EditorPanel({
         drawSelection(),
         highlightActiveLine(),
         history(),
-        keymap.of([...defaultKeymap, ...historyKeymap]),
+        search({ top: true }),
+        Prec.highest(
+          keymap.of([
+            { key: "Mod-f", run: toggleFindPanel },
+            { key: "Mod-f", run: toggleFindPanel, scope: "editor search-panel" },
+            { key: "Escape", run: closeFindPanelIfOpen },
+            {
+              key: "Escape",
+              run: closeFindPanelIfOpen,
+              scope: "editor search-panel",
+            },
+          ]),
+        ),
+        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
         themeCompartment.of(getCodemirrorTheme(resolvedTheme)),
         languageCompartment.of(languageExtensions(language)),
         EditorView.updateListener.of((update) => {

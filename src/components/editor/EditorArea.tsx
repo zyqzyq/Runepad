@@ -1,12 +1,20 @@
+import { useEffect } from "react";
 import { EditorPanel } from "@/components/editor/EditorPanel";
+import { editorInstances } from "@/lib/editorInstances";
 import { useTabStore } from "@/stores/tabStore";
 
 export function EditorArea(): JSX.Element {
   const tabs = useTabStore((s) => s.tabs);
   const activeId = useTabStore((s) => s.activeId);
 
+  useEffect(() => {
+    if (!activeId) return;
+    const view = editorInstances.get(activeId);
+    view?.focus();
+  }, [activeId]);
+
   return (
-    <div className="relative min-h-0 flex-1 bg-background">
+    <div data-editor-area className="relative min-h-0 flex-1 bg-background">
       {tabs.map((tab) => (
         <EditorPanel
           key={tab.id}

@@ -2,10 +2,12 @@ import { listen } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
 import { useExplorerActions } from "@/hooks/useExplorerActions";
 import { useFileActions } from "@/hooks/useFileActions";
+import { useUiStore } from "@/stores/uiStore";
 
 type MenuFileActionId =
   | "file-new"
   | "file-open"
+  | "file-recent"
   | "file-open-folder"
   | "file-close-folder"
   | "file-save"
@@ -15,6 +17,7 @@ function isMenuFileActionId(value: string): value is MenuFileActionId {
   return (
     value === "file-new" ||
     value === "file-open" ||
+    value === "file-recent" ||
     value === "file-open-folder" ||
     value === "file-close-folder" ||
     value === "file-save" ||
@@ -47,6 +50,9 @@ export function useAppMenu(): void {
           break;
         case "file-open":
           void current.openFile();
+          break;
+        case "file-recent":
+          useUiStore.getState().setRecentFilesOpen(true);
           break;
         case "file-open-folder":
           void explorerCurrent.openFolder();

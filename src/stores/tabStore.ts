@@ -15,6 +15,7 @@ interface TabStore {
   }) => string;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
+  reorderTabs: (fromIndex: number, toIndex: number) => void;
   markDirty: (id: string, dirty?: boolean) => void;
   updateTab: (id: string, patch: Partial<Tab>) => void;
   getActiveTab: () => Tab | undefined;
@@ -82,6 +83,24 @@ export const useTabStore = create<TabStore>((set, get) => ({
   },
 
   setActiveTab: (id) => set({ activeId: id }),
+
+  reorderTabs: (fromIndex, toIndex) =>
+    set((s) => {
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= s.tabs.length ||
+        toIndex >= s.tabs.length ||
+        fromIndex === toIndex
+      ) {
+        return s;
+      }
+      const tabs = [...s.tabs];
+      const [moved] = tabs.splice(fromIndex, 1);
+      if (!moved) return s;
+      tabs.splice(toIndex, 0, moved);
+      return { tabs };
+    }),
 
   markDirty: (id, dirty = true) =>
     set((s) => ({

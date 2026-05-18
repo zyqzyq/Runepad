@@ -120,4 +120,22 @@
   html {
     @apply font-sans;
   }
+
+  .cm-panel.cm-search {
+    background: var(--popover);
+    color: var(--popover-foreground);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cm-panel.cm-search input.cm-textfield,
+  .cm-panel.cm-search button {
+    background: var(--background);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .cm-panel.cm-search label {
+    color: var(--muted-foreground);
+  }
 }

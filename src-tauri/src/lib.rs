@@ -6,8 +6,9 @@ use commands::dir_ops::read_dir;
 use commands::file_ops::{read_file, write_file};
 use commands::system_ops::get_system_theme;
 use menu::{
-    init_app_menu, MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE, MENU_FILE_CLOSE_FOLDER,
-    MENU_FILE_NEW, MENU_FILE_OPEN, MENU_FILE_OPEN_FOLDER, MENU_FILE_SAVE,
+    init_app_menu, MENU_EDIT_ACTION_EVENT, MENU_EDIT_FIND, MENU_EDIT_REPLACE,
+    MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE, MENU_FILE_CLOSE_FOLDER, MENU_FILE_NEW,
+    MENU_FILE_OPEN, MENU_FILE_OPEN_FOLDER, MENU_FILE_RECENT, MENU_FILE_SAVE,
 };
 use tauri::Emitter;
 
@@ -26,12 +27,15 @@ pub fn run() {
                 id,
                 MENU_FILE_NEW
                     | MENU_FILE_OPEN
+                    | MENU_FILE_RECENT
                     | MENU_FILE_OPEN_FOLDER
                     | MENU_FILE_CLOSE_FOLDER
                     | MENU_FILE_SAVE
                     | MENU_FILE_CLOSE
             ) {
                 let _ = app.emit(MENU_FILE_ACTION_EVENT, id);
+            } else if matches!(id, MENU_EDIT_FIND | MENU_EDIT_REPLACE) {
+                let _ = app.emit(MENU_EDIT_ACTION_EVENT, id);
             }
         })
         .invoke_handler(tauri::generate_handler![

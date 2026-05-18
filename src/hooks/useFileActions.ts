@@ -5,6 +5,7 @@ import { useCloseTab } from "@/hooks/useCloseTab";
 import { basename, languageFromFilename } from "@/lib/languageFromFilename";
 import { editorInstances } from "@/lib/editorInstances";
 import { openFileInTab } from "@/lib/openFileInTab";
+import { useRecentFilesStore } from "@/stores/recentFilesStore";
 import { useTabStore } from "@/stores/tabStore";
 
 const TEXT_FILTERS = [
@@ -94,6 +95,7 @@ export function useFileActions(): {
           language: languageFromFilename(filename),
         });
         markDirty(tabId, false);
+        useRecentFilesStore.getState().push(path);
         return true;
       } catch (e) {
         toast.error(e instanceof Error ? e.message : String(e));

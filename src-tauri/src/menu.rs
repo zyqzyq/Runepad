@@ -7,12 +7,17 @@ use tauri::{App, AppHandle};
 
 pub const MENU_FILE_NEW: &str = "file-new";
 pub const MENU_FILE_OPEN: &str = "file-open";
+pub const MENU_FILE_RECENT: &str = "file-recent";
 pub const MENU_FILE_SAVE: &str = "file-save";
 pub const MENU_FILE_CLOSE: &str = "file-close";
 pub const MENU_FILE_OPEN_FOLDER: &str = "file-open-folder";
 pub const MENU_FILE_CLOSE_FOLDER: &str = "file-close-folder";
 
+pub const MENU_EDIT_FIND: &str = "edit-find";
+pub const MENU_EDIT_REPLACE: &str = "edit-replace";
+
 pub const MENU_FILE_ACTION_EVENT: &str = "menu-file-action";
+pub const MENU_EDIT_ACTION_EVENT: &str = "menu-edit-action";
 
 pub fn init_app_menu(app: &App) -> tauri::Result<()> {
     let menu = build_app_menu(app.handle())?;
@@ -28,6 +33,8 @@ fn build_app_menu<R: tauri::Runtime>(handle: &AppHandle<R>) -> tauri::Result<tau
         .build(handle)?;
     let file_open = MenuItemBuilder::with_id(MENU_FILE_OPEN, "&Open...")
         .accelerator(format!("{MOD}+O"))
+        .build(handle)?;
+    let file_recent = MenuItemBuilder::with_id(MENU_FILE_RECENT, "Open &Recent...")
         .build(handle)?;
     let file_save = MenuItemBuilder::with_id(MENU_FILE_SAVE, "&Save")
         .accelerator(format!("{MOD}+S"))
@@ -45,6 +52,7 @@ fn build_app_menu<R: tauri::Runtime>(handle: &AppHandle<R>) -> tauri::Result<tau
         let mut builder = SubmenuBuilder::new(handle, "&File")
             .item(&file_new)
             .item(&file_open)
+            .item(&file_recent)
             .item(&file_open_folder)
             .item(&file_save)
             .separator()
@@ -58,6 +66,12 @@ fn build_app_menu<R: tauri::Runtime>(handle: &AppHandle<R>) -> tauri::Result<tau
         builder.build()?
     };
 
+    let edit_find = MenuItemBuilder::with_id(MENU_EDIT_FIND, "&Find...")
+        .accelerator(format!("{MOD}+F"))
+        .build(handle)?;
+    let edit_replace = MenuItemBuilder::with_id(MENU_EDIT_REPLACE, "&Replace...")
+        .accelerator(format!("{MOD}+H"))
+        .build(handle)?;
     let edit_submenu = SubmenuBuilder::new(handle, "&Edit")
         .undo()
         .redo()
@@ -67,6 +81,9 @@ fn build_app_menu<R: tauri::Runtime>(handle: &AppHandle<R>) -> tauri::Result<tau
         .paste()
         .separator()
         .select_all()
+        .separator()
+        .item(&edit_find)
+        .item(&edit_replace)
         .build()?;
 
     #[cfg(target_os = "macos")]
