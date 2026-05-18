@@ -9,6 +9,8 @@ pub const MENU_FILE_NEW: &str = "file-new";
 pub const MENU_FILE_OPEN: &str = "file-open";
 pub const MENU_FILE_SAVE: &str = "file-save";
 pub const MENU_FILE_CLOSE: &str = "file-close";
+pub const MENU_FILE_OPEN_FOLDER: &str = "file-open-folder";
+pub const MENU_FILE_CLOSE_FOLDER: &str = "file-close-folder";
 
 pub const MENU_FILE_ACTION_EVENT: &str = "menu-file-action";
 
@@ -33,14 +35,22 @@ fn build_app_menu<R: tauri::Runtime>(handle: &AppHandle<R>) -> tauri::Result<tau
     let file_close = MenuItemBuilder::with_id(MENU_FILE_CLOSE, "Close &Tab")
         .accelerator(format!("{MOD}+W"))
         .build(handle)?;
+    let file_open_folder = MenuItemBuilder::with_id(MENU_FILE_OPEN_FOLDER, "Open &Folder...")
+        .accelerator(format!("{MOD}+Shift+O"))
+        .build(handle)?;
+    let file_close_folder =
+        MenuItemBuilder::with_id(MENU_FILE_CLOSE_FOLDER, "Close Fol&der").build(handle)?;
 
     let file_submenu = {
         let mut builder = SubmenuBuilder::new(handle, "&File")
             .item(&file_new)
             .item(&file_open)
+            .item(&file_open_folder)
             .item(&file_save)
             .separator()
-            .item(&file_close);
+            .item(&file_close)
+            .separator()
+            .item(&file_close_folder);
         #[cfg(not(target_os = "macos"))]
         {
             builder = builder.separator().quit();

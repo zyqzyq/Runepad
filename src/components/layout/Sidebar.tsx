@@ -1,11 +1,17 @@
 import { PanelLeft, PanelLeftClose } from "lucide-react";
+import { FileTree } from "@/components/explorer/FileTree";
 import { Button } from "@/components/ui/button";
+import { basename } from "@/lib/languageFromFilename";
 import { cn } from "@/lib/utils";
+import { useExplorerStore } from "@/stores/explorerStore";
 import { useUiStore } from "@/stores/uiStore";
 
 export function Sidebar(): JSX.Element {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
+  const rootPath = useExplorerStore((s) => s.rootPath);
+
+  const title = rootPath ? basename(rootPath) : "Explorer";
 
   return (
     <aside
@@ -14,7 +20,7 @@ export function Sidebar(): JSX.Element {
         collapsed ? "w-10" : "w-[250px]",
       )}
     >
-      <div className="flex h-9 items-center border-b border-border px-1">
+      <div className="flex h-9 shrink-0 items-center border-b border-border px-1">
         <Button
           type="button"
           variant="ghost"
@@ -29,11 +35,12 @@ export function Sidebar(): JSX.Element {
           )}
         </Button>
         {!collapsed && (
-          <span className="ml-1 truncate text-xs text-muted-foreground">
-            Explorer (P1)
+          <span className="ml-1 truncate text-xs text-muted-foreground" title={rootPath ?? undefined}>
+            {title}
           </span>
         )}
       </div>
+      {!collapsed && <FileTree />}
     </aside>
   );
 }

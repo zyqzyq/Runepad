@@ -6,6 +6,7 @@ interface TabStore {
   activeId: string | null;
   addNewTab: () => string;
   addTabFromFile: (params: {
+    id?: string;
     filepath: string;
     filename: string;
     encoding: string;
@@ -50,7 +51,7 @@ export const useTabStore = create<TabStore>((set, get) => ({
 
   addTabFromFile: (params) => {
     const tab: Tab = {
-      id: crypto.randomUUID(),
+      id: params.id ?? crypto.randomUUID(),
       filename: params.filename,
       filepath: params.filepath,
       isDirty: false,

@@ -50,6 +50,13 @@ export async function openDialog(options?: {
   return String(selected);
 }
 
+export async function openFolderDialog(): Promise<string | null> {
+  const selected = await open({ directory: true, multiple: false });
+  if (selected === null) return null;
+  if (Array.isArray(selected)) return selected[0] ? String(selected[0]) : null;
+  return String(selected);
+}
+
 export async function saveDialog(options?: {
   defaultPath?: string;
   filters?: Array<{ name: string; extensions: string[] }>;

@@ -1,5 +1,5 @@
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-import { Compartment, EditorState } from "@codemirror/state";
+import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import {
   drawSelection,
   EditorView,
@@ -9,6 +9,7 @@ import {
 } from "@codemirror/view";
 import { useEffect, useRef } from "react";
 import { getCodemirrorTheme } from "@/lib/codemirrorTheme";
+import { getLanguageExtension } from "@/lib/codemirrorLanguages";
 import { destroyEditorInstance, editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 import { useEditorStore } from "@/stores/editorStore";
@@ -17,6 +18,7 @@ import { useUiStore } from "@/stores/uiStore";
 
 interface EditorPanelProps {
   docId: string;
+  language: string;
   isActive: boolean;
 }
 
@@ -26,9 +28,19 @@ function countWords(text: string): number {
   return trimmed.split(/\s+/).length;
 }
 
-export function EditorPanel({ docId, isActive }: EditorPanelProps): JSX.Element {
+function languageExtensions(language: string): Extension[] {
+  const ext = getLanguageExtension(language);
+  return ext ? [ext] : [];
+}
+
+export function EditorPanel({
+  docId,
+  language,
+  isActive,
+}: EditorPanelProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const themeCompartment = useRef(new Compartment()).current;
+  const languageCompartment = useRef(new Compartment()).current;
   const resolvedTheme = useUiStore((s) => s.resolvedTheme);
   const markDirty = useTabStore((s) => s.markDirty);
   const setMeta = useEditorStore((s) => s.setMeta);
@@ -37,6 +49,8 @@ export function EditorPanel({ docId, isActive }: EditorPanelProps): JSX.Element 
     const parent = containerRef.current;
     if (!parent) return;
 
+    // Keep pending doc until tab close (disposeTabEditor). Do not delete here:
+    // StrictMode remounts would otherwise recreate the editor with empty text.
     const initialDoc = pendingInitialDocs.get(docId) ?? "";
 
     const updateMeta = (view: EditorView): void => {
@@ -58,6 +72,7 @@ export function EditorPanel({ docId, isActive }: EditorPanelProps): JSX.Element 
         history(),
         keymap.of([...defaultKeymap, ...historyKeymap]),
         themeCompartment.of(getCodemirrorTheme(resolvedTheme)),
+        languageCompartment.of(languageExtensions(language)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             markDirty(docId, true);
@@ -76,7 +91,7 @@ export function EditorPanel({ docId, isActive }: EditorPanelProps): JSX.Element 
     return () => {
       destroyEditorInstance(docId);
     };
-  }, [docId, markDirty, setMeta, themeCompartment]);
+  }, [docId, languageCompartment, markDirty, setMeta, themeCompartment]);
 
   useEffect(() => {
     const view = editorInstances.get(docId);
@@ -85,6 +100,14 @@ export function EditorPanel({ docId, isActive }: EditorPanelProps): JSX.Element 
       effects: themeCompartment.reconfigure(getCodemirrorTheme(resolvedTheme)),
     });
   }, [docId, resolvedTheme, themeCompartment]);
+
+  useEffect(() => {
+    const view = editorInstances.get(docId);
+    if (!view) return;
+    view.dispatch({
+      effects: languageCompartment.reconfigure(languageExtensions(language)),
+    });
+  }, [docId, language, languageCompartment]);
 
   return (
     <div

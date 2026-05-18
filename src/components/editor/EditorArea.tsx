@@ -11,6 +11,7 @@ export function EditorArea(): JSX.Element {
         <EditorPanel
           key={tab.id}
           docId={tab.id}
+          language={tab.language}
           isActive={tab.id === activeId}
         />
       ))}

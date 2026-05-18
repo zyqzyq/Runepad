@@ -1,22 +1,18 @@
 import type { MouseEvent } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { disposeTabEditor } from "@/lib/editorInstances";
-import { useEditorStore } from "@/stores/editorStore";
+import { useCloseTab } from "@/hooks/useCloseTab";
 import { useTabStore } from "@/stores/tabStore";
 
 export function TabBar(): JSX.Element {
   const tabs = useTabStore((s) => s.tabs);
   const activeId = useTabStore((s) => s.activeId);
   const setActiveTab = useTabStore((s) => s.setActiveTab);
-  const closeTab = useTabStore((s) => s.closeTab);
-  const removeMeta = useEditorStore((s) => s.removeMeta);
+  const { requestCloseTab } = useCloseTab();
 
   const handleClose = (id: string, e: MouseEvent): void => {
     e.stopPropagation();
-    disposeTabEditor(id);
-    removeMeta(id);
-    closeTab(id);
+    requestCloseTab(id);
   };
 
   const handleMiddleClick = (id: string, e: MouseEvent): void => {
