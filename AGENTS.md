@@ -2,7 +2,7 @@
 
 > 本文件是项目的「宪法」。Cursor / AI 在生成代码前必须阅读并严格遵守。  
 > 人类向文档见 `README.md`（安装、运行）；本文件仅描述架构契约与 AI 执行规则。  
-> 版本: 0.2.1 | 最后更新: 2026-05-18
+> 版本: 0.2.2 | 最后更新: 2026-05-18
 
 ---
 
@@ -50,7 +50,7 @@
 | 桌面框架 | Tauri | v2.x | 系统 API、窗口管理、IPC、Capabilities |
 | 构建工具 | Vite | v6.x | 前端构建 |
 | UI 框架 | React | v18.x | 组件渲染 |
-| 样式 | TailwindCSS | v3.x | 原子化 CSS；`src/index.css` 含 shadcn 变量与 `@import` |
+| 样式 | TailwindCSS | **v4.x** | `@tailwindcss/vite`；主题在 `src/index.css`（`@import "tailwindcss"` + `@theme`） |
 | 组件库 | shadcn/ui | **CLI v4.x**（`components.json` 为准） | 通过 registry 生成到 `src/components/ui/` |
 | UI primitives | @base-ui/react | 随 shadcn 组件 | v4 默认替代 Radix（勿擅自改回 Radix） |
 | 工具链 | clsx、tailwind-merge、CVA、lucide-react | 随 shadcn init | `cn()` 见 `src/lib/utils.ts` |
@@ -77,7 +77,7 @@
 - **配置**：根目录 [`components.json`](components.json)，当前 `style`: `base-nova`。
 - **依赖**：`shadcn`、`@base-ui/react`、`tw-animate-css`、`@fontsource-variable/geist` 等为 v4 模板自带；`package.json` 中保留，勿在无理由下删除。
 - **生成物**：仅改 `src/components/ui/*` 与 `src/lib/utils.ts`；业务组件放 `layout/`、`editor/`。
-- **Tailwind v3 注意**：`index.css` 中 `@import "shadcn/tailwind.css"` 含 v4 语法片段；若 `@apply` 报错，在 `index.css` 做最小修补（已移除不兼容的 `outline-ring/50`），勿整体回退 v3 手写 Radix。
+- **Tailwind v4**：使用 `@tailwindcss/vite` 插件（见 `vite.config.ts`），**无** `tailwind.config.js` / `postcss.config.js`；`components.json` 中 `tailwind.config` 为空字符串。设计令牌在 `src/index.css` 的 `@theme inline` 与 `:root` / `.dark`。
 - **Toast**：使用生成的 `Toaster`（`src/components/ui/sonner.tsx`）。P0 暂可依赖 `next-themes` 的 `useTheme` 供 Sonner 用；**应用主题**仍由 `uiStore` + `html.dark`（§8.1），后续可将 Toaster 改为读取 `uiStore.resolvedTheme`。
 
 ---
@@ -111,7 +111,7 @@ runepad/                         # 项目根（包名 runepad）
 ├── public/
 ├── index.html
 ├── vite.config.ts
-├── tailwind.config.ts
+├── src/index.css              # Tailwind v4 入口 + shadcn 变量
 ├── tsconfig.json
 ├── components.json
 ├── pnpm-lock.yaml
@@ -403,7 +403,7 @@ Command Palette（Ctrl/Cmd+Shift+P）属 **P3+**。
 ```bash
 # Commit 1 — 核心 npm
 pnpm add zustand @codemirror/view @codemirror/state @codemirror/language @codemirror/commands @codemirror/search @codemirror/lang-javascript @codemirror/lang-json @codemirror/lang-markdown @tauri-apps/plugin-dialog sonner
-pnpm add -D tailwindcss@3 postcss autoprefixer
+pnpm add -D tailwindcss@4 @tailwindcss/vite
 
 # Commit 2 — shadcn/ui v4（会写入 Base UI、Geist、tw-animate-css 等，见 §3.1）
 npx shadcn@latest init -y -d
