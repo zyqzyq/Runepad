@@ -2,7 +2,7 @@
 
 > 本文件是项目的「宪法」。Cursor / AI 在生成代码前必须阅读并严格遵守。  
 > 人类向文档见 `README.md`（安装、运行）；本文件仅描述架构契约与 AI 执行规则。  
-> 版本: 0.2.0 | 最后更新: 2026-05-18
+> 版本: 0.2.1 | 最后更新: 2026-05-18
 
 ---
 
@@ -17,12 +17,12 @@
 
 ### 1.1 当前仓库阶段
 
-脚手架已就绪（Tauri v2 + React + Vite）。以下依赖**尚未安装**，实现对应功能前须按 §13 安装，禁止 AI 假设已存在：
+脚手架已就绪（Tauri v2 + React + Vite）。以下依赖**尚未安装或未完成集成**，实现对应功能前须按 §13 安装，禁止 AI 假设已存在：
 
-- TailwindCSS v3、shadcn/ui、Zustand v5
-- CodeMirror 6 核心包及语言包
-- `@tauri-apps/plugin-dialog`（及按需的 fs 相关能力）
-- `sonner`（配合 shadcn toast）
+- ~~TailwindCSS v3、shadcn/ui v4（Base UI）~~（Commit 2 已完成）
+- CodeMirror 6 核心包及语言包（npm 包已装，编辑器组件未接）
+- `@tauri-apps/plugin-dialog`（npm 已装，业务未接）
+- ~~`sonner`~~（npm 已装；`src/components/ui/sonner.tsx` 已生成，App 未挂载）
 
 ---
 
@@ -50,8 +50,10 @@
 | 桌面框架 | Tauri | v2.x | 系统 API、窗口管理、IPC、Capabilities |
 | 构建工具 | Vite | v6.x | 前端构建 |
 | UI 框架 | React | v18.x | 组件渲染 |
-| 样式 | TailwindCSS | v3.x | 原子化 CSS |
-| 组件库 | shadcn/ui | 随 `components.json` | Button、Dialog、Tabs 等 |
+| 样式 | TailwindCSS | v3.x | 原子化 CSS；`src/index.css` 含 shadcn 变量与 `@import` |
+| 组件库 | shadcn/ui | **CLI v4.x**（`components.json` 为准） | 通过 registry 生成到 `src/components/ui/` |
+| UI primitives | @base-ui/react | 随 shadcn 组件 | v4 默认替代 Radix（勿擅自改回 Radix） |
+| 工具链 | clsx、tailwind-merge、CVA、lucide-react | 随 shadcn init | `cn()` 见 `src/lib/utils.ts` |
 | 编辑器 | CodeMirror 6 | ^6.0 | 核心文本编辑 |
 | 状态管理 | Zustand | v5.x | 全局状态 |
 | 列表虚拟化 | @tanstack/react-virtual | latest | 文件树等大列表 |
@@ -66,6 +68,17 @@
 - ❌ Monaco Editor / Ace Editor（用 CodeMirror 6）
 - ❌ Electron（用 Tauri）
 - ❌ react-window（统一用 `@tanstack/react-virtual`）
+- ❌ 手写复制 Radix 版 shadcn 组件覆盖 registry 生成物（须 `npx shadcn@latest add`）
+- ❌ 用 `next-themes` 驱动**应用**亮暗（Tauri 非 Next）；见 §8.1
+
+### 3.1 shadcn/ui v4（已选方案 A）
+
+- **初始化 / 加组件**：`npx shadcn@latest init`、`npx shadcn@latest add <name>`（勿固定死旧版 CLI）。
+- **配置**：根目录 [`components.json`](components.json)，当前 `style`: `base-nova`。
+- **依赖**：`shadcn`、`@base-ui/react`、`tw-animate-css`、`@fontsource-variable/geist` 等为 v4 模板自带；`package.json` 中保留，勿在无理由下删除。
+- **生成物**：仅改 `src/components/ui/*` 与 `src/lib/utils.ts`；业务组件放 `layout/`、`editor/`。
+- **Tailwind v3 注意**：`index.css` 中 `@import "shadcn/tailwind.css"` 含 v4 语法片段；若 `@apply` 报错，在 `index.css` 做最小修补（已移除不兼容的 `outline-ring/50`），勿整体回退 v3 手写 Radix。
+- **Toast**：使用生成的 `Toaster`（`src/components/ui/sonner.tsx`）。P0 暂可依赖 `next-themes` 的 `useTheme` 供 Sonner 用；**应用主题**仍由 `uiStore` + `html.dark`（§8.1），后续可将 Toaster 改为读取 `uiStore.resolvedTheme`。
 
 ---
 
@@ -267,9 +280,10 @@ export async function getSystemTheme(): Promise<'light' | 'dark'>;
 
 ### 8.1 主题
 
-- Light / Dark / System
-- 暗色主背景 `#1e1e1e`，亮色 `#ffffff`
-- CodeMirror 主题随应用主题切换
+- Light / Dark / System（`uiStore.theme` → `resolvedTheme` → `document.documentElement` 的 `dark` class）
+- 应用壳：shadcn CSS 变量（`src/index.css` 的 `:root` / `.dark`，oklch）；编辑器区域 P0 仍约定 CM 背景亮 `#ffffff` / 暗 `#1e1e1e`（`codemirrorTheme.ts`）
+- **禁止**以 `next-themes` 作为应用主题唯一来源；`next-themes` 仅允许服务于 `Toaster` 直至改为 `uiStore` 同步
+- CodeMirror 主题随 `resolvedTheme` 切换，与 App 分离实现、同一状态入口更新
 
 ### 8.2 布局
 
@@ -387,11 +401,16 @@ Command Palette（Ctrl/Cmd+Shift+P）属 **P3+**。
 **前端核心**
 
 ```bash
-pnpm add zustand @codemirror/view @codemirror/state @codemirror/language @codemirror/commands @codemirror/search @codemirror/lang-javascript @codemirror/lang-json @codemirror/lang-markdown
-pnpm add -D tailwindcss postcss autoprefixer
-# shadcn 初始化后：
-npx shadcn@latest add button dialog tabs scroll-area sonner toast
-pnpm add sonner @tanstack/react-virtual
+# Commit 1 — 核心 npm
+pnpm add zustand @codemirror/view @codemirror/state @codemirror/language @codemirror/commands @codemirror/search @codemirror/lang-javascript @codemirror/lang-json @codemirror/lang-markdown @tauri-apps/plugin-dialog sonner
+pnpm add -D tailwindcss@3 postcss autoprefixer
+
+# Commit 2 — shadcn/ui v4（会写入 Base UI、Geist、tw-animate-css 等，见 §3.1）
+npx shadcn@latest init -y -d
+npx shadcn@latest add button dialog tabs scroll-area sonner
+
+# P1+
+pnpm add @tanstack/react-virtual
 ```
 
 **Tauri 插件（按需注册到 lib.rs + capabilities）**
@@ -429,7 +448,8 @@ pnpm tauri dev
 pnpm tauri build
 pnpm tsc --noEmit
 cd src-tauri && cargo check && cargo clippy
-npx shadcn@latest add tabs dialog button input scroll-area sonner
+npx shadcn@latest init -y -d   # 仅新建仓库时
+npx shadcn@latest add button dialog tabs scroll-area sonner
 ```
 
 ---
