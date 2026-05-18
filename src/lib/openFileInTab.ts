@@ -1,4 +1,5 @@
 import { readFile } from "@/api/fileApi";
+import { syncFileWatchesNow } from "@/hooks/useDirWatcher";
 import { basename, languageFromFilename } from "@/lib/languageFromFilename";
 import { normalizePath } from "@/lib/normalizePath";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
@@ -30,4 +31,5 @@ export async function openFileInTab(path: string): Promise<void> {
     language,
   });
   useRecentFilesStore.getState().push(path);
+  syncFileWatchesNow();
 }

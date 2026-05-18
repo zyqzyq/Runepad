@@ -18,6 +18,7 @@ interface TabStore {
   reorderTabs: (fromIndex: number, toIndex: number) => void;
   markDirty: (id: string, dirty?: boolean) => void;
   updateTab: (id: string, patch: Partial<Tab>) => void;
+  replaceTabs: (tabs: Tab[], activeId: string | null) => void;
   getActiveTab: () => Tab | undefined;
 }
 
@@ -111,6 +112,19 @@ export const useTabStore = create<TabStore>((set, get) => ({
     set((s) => ({
       tabs: s.tabs.map((t) => (t.id === id ? { ...t, ...patch } : t)),
     })),
+
+  replaceTabs: (tabs, activeId) => {
+    if (tabs.length === 0) {
+      const tab = createEmptyTab();
+      set({ tabs: [tab], activeId: tab.id });
+      return;
+    }
+    const validActive =
+      activeId && tabs.some((t) => t.id === activeId)
+        ? activeId
+        : (tabs[0]?.id ?? null);
+    set({ tabs, activeId: validActive });
+  },
 
   getActiveTab: () => {
     const { tabs, activeId } = get();

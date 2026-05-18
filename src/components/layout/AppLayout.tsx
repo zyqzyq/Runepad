@@ -8,6 +8,8 @@ import { useAppMenu } from "@/hooks/useAppMenu";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useEditMenu } from "@/hooks/useEditMenu";
 import { useEditorShortcuts } from "@/hooks/useEditorShortcuts";
+import { useDirWatcher } from "@/hooks/useDirWatcher";
+import { useSessionRestore } from "@/hooks/useSessionRestore";
 import { RecentFilesHost } from "@/components/layout/RecentFilesHost";
 import { useExplorerStore } from "@/stores/explorerStore";
 
@@ -16,6 +18,8 @@ export function AppLayout(): JSX.Element {
   useAppMenu();
   useEditMenu();
   useEditorShortcuts();
+  useSessionRestore();
+  useDirWatcher();
   const rootPath = useExplorerStore((s) => s.rootPath);
 
   return (

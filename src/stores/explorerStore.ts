@@ -9,6 +9,7 @@ interface ExplorerStore {
   closeRoot: () => void;
   toggleExpand: (path: string) => void;
   setChildren: (path: string, entries: DirEntry[]) => void;
+  restoreExplorer: (root: string, expandedPaths: string[]) => void;
   isExpanded: (path: string) => boolean;
 }
 
@@ -46,6 +47,18 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     set((s) => ({
       childrenByPath: { ...s.childrenByPath, [path]: entries },
     })),
+
+  restoreExplorer: (root, expandedPaths) => {
+    const expanded: Record<string, true> = { [root]: true };
+    for (const p of expandedPaths) {
+      expanded[p] = true;
+    }
+    set({
+      rootPath: root,
+      expandedPaths: expanded,
+      childrenByPath: {},
+    });
+  },
 
   isExpanded: (path) => Boolean(get().expandedPaths[path]),
 }));
