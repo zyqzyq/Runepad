@@ -1,10 +1,17 @@
 import { create } from "zustand";
-import type { Tab } from "@/types/tab";
+import type { LineEnding, Tab } from "@/types/tab";
 
 interface TabStore {
   tabs: Tab[];
   activeId: string | null;
   addNewTab: () => string;
+  addTabFromFile: (params: {
+    filepath: string;
+    filename: string;
+    encoding: string;
+    lineEnding: LineEnding;
+    language: string;
+  }) => string;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
   markDirty: (id: string, dirty?: boolean) => void;
@@ -37,6 +44,21 @@ export const useTabStore = create<TabStore>((set, get) => ({
 
   addNewTab: () => {
     const tab = createEmptyTab();
+    set((s) => ({ tabs: [...s.tabs, tab], activeId: tab.id }));
+    return tab.id;
+  },
+
+  addTabFromFile: (params) => {
+    const tab: Tab = {
+      id: crypto.randomUUID(),
+      filename: params.filename,
+      filepath: params.filepath,
+      isDirty: false,
+      isNew: false,
+      language: params.language,
+      encoding: params.encoding,
+      lineEnding: params.lineEnding,
+    };
     set((s) => ({ tabs: [...s.tabs, tab], activeId: tab.id }));
     return tab.id;
   },
