@@ -2,8 +2,12 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 import { openDialog, readFile, saveDialog, writeFile } from "@/api/fileApi";
 import { basename, languageFromFilename } from "@/lib/languageFromFilename";
+import {
+  destroyEditorInstance,
+  editorInstances,
+} from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
-import { editorInstances } from "@/lib/editorInstances";
+import { useEditorStore } from "@/stores/editorStore";
 import { useTabStore } from "@/stores/tabStore";
 
 const TEXT_FILTERS = [
@@ -38,6 +42,7 @@ export function useFileActions(): {
   const addNewTab = useTabStore((s) => s.addNewTab);
   const addTabFromFile = useTabStore((s) => s.addTabFromFile);
   const closeTab = useTabStore((s) => s.closeTab);
+  const removeMeta = useEditorStore((s) => s.removeMeta);
   const updateTab = useTabStore((s) => s.updateTab);
   const markDirty = useTabStore((s) => s.markDirty);
   const activeId = useTabStore((s) => s.activeId);
@@ -108,8 +113,11 @@ export function useFileActions(): {
   }, [activeId, getActiveTab, markDirty, updateTab]);
 
   const closeActiveTab = useCallback(() => {
-    if (activeId) closeTab(activeId);
-  }, [activeId, closeTab]);
+    if (!activeId) return;
+    destroyEditorInstance(activeId);
+    removeMeta(activeId);
+    closeTab(activeId);
+  }, [activeId, closeTab, removeMeta]);
 
   return { newFile, openFile, saveFile, closeActiveTab };
 }

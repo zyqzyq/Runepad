@@ -4,9 +4,11 @@ import { StatusBar } from "@/components/layout/StatusBar";
 import { TabBar } from "@/components/layout/TabBar";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useEditorShortcuts } from "@/hooks/useEditorShortcuts";
 
 export function AppLayout(): JSX.Element {
   useAppTheme();
+  useEditorShortcuts();
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
