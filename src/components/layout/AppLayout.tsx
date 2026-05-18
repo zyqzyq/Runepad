@@ -3,11 +3,13 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { StatusBar } from "@/components/layout/StatusBar";
 import { TabBar } from "@/components/layout/TabBar";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useAppMenu } from "@/hooks/useAppMenu";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useEditorShortcuts } from "@/hooks/useEditorShortcuts";
 
 export function AppLayout(): JSX.Element {
   useAppTheme();
+  useAppMenu();
   useEditorShortcuts();
 
   return (

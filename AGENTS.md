@@ -32,7 +32,7 @@
 
 | 阶段 | 目标 | 包含 |
 |------|------|------|
-| **P0** | 可编辑、可存盘 | 布局骨架、CodeMirror 编辑器、Tab、`Ctrl+O/S/N/W`、StatusBar（行列/编码/换行/字数）、Light/Dark/System 主题 |
+| **P0** | 可编辑、可存盘 | 布局骨架、CodeMirror 编辑器、Tab、**Tauri 原生菜单**（文件/编辑）、`Ctrl+O/S/N/W`、StatusBar（行列/编码/换行/字数）、Light/Dark/System 主题 |
 | **P1** | 像编辑器 | Sidebar 文件树、`readDir`、脏标签关闭确认、按扩展名语法高亮、错误 toast |
 | **P2** | 效率 | 查找/替换、最近文件、Tab 拖拽排序、GBK 等非 UTF-8 读写（Windows 常见） |
 | **P3+** | 进阶 | 会话恢复、目录 `watch`（须防抖）、>10MB 分片/只读、Command Palette |
@@ -152,10 +152,13 @@ runepad/                         # 项目根（包名 runepad）
 - IPC / 事件监听在 `useEffect` 中注册并清理
 - 文件树等长列表：**仅** `@tanstack/react-virtual`
 
-### 5.4 快捷键
+### 5.4 快捷键与原生菜单
 
-- Windows / Linux：`Ctrl+*`
-- macOS：对应为 `Cmd+*`（实现时通过平台检测或 Tauri 菜单统一处理）
+- Windows / Linux：`Ctrl+*`；macOS：`Cmd+*`
+- **P0 原生菜单**：在 `src-tauri/src/menu.rs` 定义（`MenuBuilder` / `SubmenuBuilder`）；菜单项带 `CmdOrCtrl` 加速器；点击经 `menu-file-action` 事件由前端 `useAppMenu` 调用 `useFileActions`（与快捷键共用逻辑，禁止重复实现）
+- macOS 须首个 `Submenu` 作为应用菜单（About / Quit）；Win/Linux 在「文件」末项提供 Quit
+- 编辑菜单使用 `PredefinedMenuItem`（撤销/复制等），作用于 WebView/CodeMirror 焦点
+- 仍保留 `useEditorShortcuts`（Win 上部分加速器可能不进 `on_menu_event`）
 
 ---
 
@@ -305,12 +308,14 @@ export async function getSystemTheme(): Promise<'light' | 'dark'>;
 
 ### 8.3 交互（P0 起）
 
-| 操作 | 快捷键 |
-|------|--------|
-| 打开 | Ctrl/Cmd+O |
-| 保存 | Ctrl/Cmd+S |
-| 新建 | Ctrl/Cmd+N |
-| 关闭标签 | Ctrl/Cmd+W / 中键 / × |
+| 操作 | 原生菜单 | 快捷键 |
+|------|----------|--------|
+| 新建 | 文件 → 新建 | Ctrl/Cmd+N |
+| 打开 | 文件 → 打开… | Ctrl/Cmd+O |
+| 保存 | 文件 → 保存 | Ctrl/Cmd+S |
+| 关闭标签 | 文件 → 关闭标签 | Ctrl/Cmd+W / 中键 / × |
+| 退出 | macOS：Runepad → 退出；其它：文件 → 退出 | — |
+| 编辑 | 编辑 → 撤销/复制等（系统项） | — |
 
 无路径保存 → Save Dialog。`isDirty` 关闭须确认 Dialog。错误提示用 **sonner**（shadcn toast）。
 
