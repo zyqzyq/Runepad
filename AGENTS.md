@@ -19,7 +19,7 @@
 
 脚手架已就绪（Tauri v2 + React + Vite）。以下依赖**尚未安装**，实现对应功能前须按 §13 安装，禁止 AI 假设已存在：
 
-- TailwindCSS v3、shadcn/ui、Zustand v4
+- TailwindCSS v3、shadcn/ui、Zustand v5
 - CodeMirror 6 核心包及语言包
 - `@tauri-apps/plugin-dialog`（及按需的 fs 相关能力）
 - `sonner`（配合 shadcn toast）
@@ -53,7 +53,7 @@
 | 样式 | TailwindCSS | v3.x | 原子化 CSS |
 | 组件库 | shadcn/ui | 随 `components.json` | Button、Dialog、Tabs 等 |
 | 编辑器 | CodeMirror 6 | ^6.0 | 核心文本编辑 |
-| 状态管理 | Zustand | v4.x | 全局状态 |
+| 状态管理 | Zustand | v5.x | 全局状态 |
 | 列表虚拟化 | @tanstack/react-virtual | latest | 文件树等大列表 |
 | 路由 | 无 | — | 单页应用，不使用路由库 |
 | 表单 | 无 | — | 不使用 React Hook Form / Zod |
