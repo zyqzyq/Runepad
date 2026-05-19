@@ -14,7 +14,10 @@ export function EditorArea(): JSX.Element {
   }, [activeId]);
 
   return (
-    <div data-editor-area className="relative min-h-0 flex-1 bg-background">
+    <div
+      data-editor-area
+      className="relative min-h-0 flex-1 bg-[var(--editor-background)]"
+    >
       {tabs.map((tab) => (
         <EditorPanel
           key={tab.id}

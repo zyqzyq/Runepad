@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
-import { GripVertical, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { useCloseTab } from "@/hooks/useCloseTab";
@@ -118,13 +118,9 @@ export function TabBar(): JSX.Element {
     }
   };
 
-  const handleDragHandlePointerDown = (
-    index: number,
-    e: PointerEvent,
-  ): void => {
+  const handleTabPointerDown = (index: number, e: PointerEvent): void => {
     if (e.button !== 0) return;
-    e.preventDefault();
-    e.stopPropagation();
+    if ((e.target as HTMLElement).closest("[data-tab-close]")) return;
 
     dragFromRef.current = index;
     dropIndexRef.current = index;
@@ -145,7 +141,7 @@ export function TabBar(): JSX.Element {
   return (
     <div
       data-tab-bar
-      className="flex h-9 shrink-0 items-stretch overflow-x-auto border-b border-border bg-muted/20"
+      className="flex h-8 shrink-0 items-stretch overflow-x-auto border-b border-border/50 bg-background"
     >
       {tabs.map((tab, index) => {
         const isActive = tab.id === activeId;
@@ -162,14 +158,15 @@ export function TabBar(): JSX.Element {
             tabIndex={0}
             aria-selected={isActive}
             className={cn(
-              "group flex max-w-[200px] shrink-0 items-center gap-0.5 border-r border-border pr-2 pl-1 text-xs select-none",
+              "group flex max-w-[200px] shrink-0 cursor-grab items-center gap-1.5 px-3 text-xs select-none touch-none active:cursor-grabbing",
               isActive
-                ? "bg-background text-foreground"
-                : "bg-transparent text-muted-foreground hover:bg-accent/50",
+                ? "border-b-2 border-primary bg-muted/50 text-foreground"
+                : "border-b-2 border-transparent text-muted-foreground hover:bg-muted/30",
               isDragging && isDraggingActive && "opacity-50",
-              isDropTarget && "ring-1 ring-inset ring-primary",
+              isDropTarget && "bg-muted/40",
             )}
             onClick={() => handleTabClick(tab.id)}
+            onPointerDown={(e) => handleTabPointerDown(index, e)}
             onMouseUp={(e) => handleMiddleClick(tab.id, e)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
@@ -177,28 +174,20 @@ export function TabBar(): JSX.Element {
               }
             }}
           >
-            <button
-              type="button"
-              data-tab-drag-handle
-              className={cn(
-                "flex h-7 w-5 shrink-0 cursor-grab items-center justify-center rounded touch-none active:cursor-grabbing",
-                "text-muted-foreground/50 hover:text-muted-foreground",
-              )}
-              aria-label={t("tab.dragReorder", { filename: tab.filename })}
-              onPointerDown={(e) => handleDragHandlePointerDown(index, e)}
-            >
-              <GripVertical className="h-3 w-3" />
-            </button>
             {tab.isDirty && (
               <span
-                className="h-2 w-2 shrink-0 rounded-full bg-primary"
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 dark:bg-amber-400"
                 title={t("tab.unsaved")}
               />
             )}
-            <span className="min-w-0 flex-1 truncate px-1">{tab.filename}</span>
+            <span className="min-w-0 flex-1 truncate">{tab.filename}</span>
             <button
               type="button"
-              className="shrink-0 cursor-pointer rounded p-0.5 opacity-0 hover:bg-muted group-hover:opacity-100"
+              data-tab-close
+              className={cn(
+                "shrink-0 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground",
+                isActive ? "opacity-70" : "opacity-0 group-hover:opacity-70",
+              )}
               onClick={(e) => handleClose(tab.id, e)}
               onPointerDown={(e) => e.stopPropagation()}
               aria-label={t("tab.close", { filename: tab.filename })}

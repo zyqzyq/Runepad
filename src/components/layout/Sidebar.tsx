@@ -18,11 +18,11 @@ export function Sidebar(): JSX.Element {
   return (
     <aside
       className={cn(
-        "flex h-full shrink-0 flex-col border-r border-border bg-muted/30 transition-[width]",
+        "flex h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width]",
         collapsed ? "w-10" : "w-[250px]",
       )}
     >
-      <div className="flex h-9 shrink-0 items-center border-b border-border px-1">
+      <div className="flex h-8 shrink-0 items-center border-b border-sidebar-border px-1">
         <Button
           type="button"
           variant="ghost"
@@ -37,7 +37,10 @@ export function Sidebar(): JSX.Element {
           )}
         </Button>
         {!collapsed && (
-          <span className="ml-1 truncate text-xs text-muted-foreground" title={rootPath ?? undefined}>
+          <span
+            className="ml-1 truncate text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
+            title={rootPath ?? undefined}
+          >
             {title}
           </span>
         )}

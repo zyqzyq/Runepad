@@ -6,13 +6,18 @@ import { FileTreeNode } from "@/components/explorer/FileTreeNode";
 import { flattenTree } from "@/components/explorer/flattenTree";
 import { useExplorerActions } from "@/hooks/useExplorerActions";
 import { useExplorerStore } from "@/stores/explorerStore";
+import { useTabStore } from "@/stores/tabStore";
 
-const ROW_HEIGHT = 24;
+const ROW_HEIGHT = 28;
 
 export function FileTree(): JSX.Element {
   const { t } = useI18n();
   const parentRef = useRef<HTMLDivElement>(null);
   const rootPath = useExplorerStore((s) => s.rootPath);
+  const activeFilepath = useTabStore((s) => {
+    const tab = s.tabs.find((t) => t.id === s.activeId);
+    return tab?.filepath ?? null;
+  });
   const expandedPaths = useExplorerStore((s) => s.expandedPaths);
   const childrenByPath = useExplorerStore((s) => s.childrenByPath);
   const toggleExpand = useExplorerStore((s) => s.toggleExpand);
@@ -103,6 +108,11 @@ export function FileTree(): JSX.Element {
               <FileTreeNode
                 row={row}
                 isExpanded={isExpanded(row.path)}
+                isActiveFile={
+                  !row.isDirectory &&
+                  activeFilepath !== null &&
+                  row.path === activeFilepath
+                }
                 onClick={() => void handleRowClick(row)}
               />
             </div>

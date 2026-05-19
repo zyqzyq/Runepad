@@ -19,9 +19,11 @@ export function StatusBar(): JSX.Element {
   const lineEnding = activeTab?.lineEnding ?? "LF";
 
   return (
-    <footer className="flex h-[22px] shrink-0 items-center justify-between border-t border-border bg-muted/30 px-2 text-[12px] text-muted-foreground">
-      <span>{t("status.lineCol", { line: String(line), col: String(col) })}</span>
-      <span>
+    <footer className="flex h-[22px] shrink-0 items-center justify-between border-t border-border/40 bg-background px-2 text-[12px] text-muted-foreground">
+      <span className="tabular-nums tracking-tight">
+        {t("status.lineCol", { line: String(line), col: String(col) })}
+      </span>
+      <span className="tabular-nums tracking-tight">
         {encoding} · {lineEnding} ·{" "}
         {t("status.words", { count: String(wordCount) })}
       </span>

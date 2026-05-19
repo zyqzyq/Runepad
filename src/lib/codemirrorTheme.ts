@@ -2,26 +2,45 @@ import type { Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import type { ResolvedTheme } from "@/stores/uiStore";
 
-const lightTheme = EditorView.theme(
-  {
-    "&": { backgroundColor: "#ffffff", color: "#1e1e1e", height: "100%" },
-    ".cm-content": { caretColor: "#1e1e1e" },
-    ".cm-gutters": { backgroundColor: "#f5f5f5", color: "#6e6e6e", border: "none" },
-  },
-  { dark: false },
-);
+interface EditorCssVars {
+  background: string;
+  foreground: string;
+  gutterBg: string;
+  gutterFg: string;
+}
 
-const darkTheme = EditorView.theme(
-  {
-    "&": { backgroundColor: "#1e1e1e", color: "#d4d4d4", height: "100%" },
-    ".cm-content": { caretColor: "#d4d4d4" },
-    ".cm-gutters": { backgroundColor: "#1e1e1e", color: "#858585", border: "none" },
-  },
-  { dark: true },
-);
+function readEditorCssVars(): EditorCssVars {
+  const style = getComputedStyle(document.documentElement);
+  return {
+    background: style.getPropertyValue("--editor-background").trim() || "#ffffff",
+    foreground: style.getPropertyValue("--editor-foreground").trim() || "#1e1e1e",
+    gutterBg: style.getPropertyValue("--editor-gutter-bg").trim() || "#f5f5f5",
+    gutterFg: style.getPropertyValue("--editor-gutter-fg").trim() || "#6e6e6e",
+  };
+}
+
+function buildEditorTheme(vars: EditorCssVars, dark: boolean): Extension {
+  return EditorView.theme(
+    {
+      "&": {
+        backgroundColor: vars.background,
+        color: vars.foreground,
+        height: "100%",
+      },
+      ".cm-content": { caretColor: vars.foreground },
+      ".cm-gutters": {
+        backgroundColor: vars.gutterBg,
+        color: vars.gutterFg,
+        border: "none",
+      },
+    },
+    { dark },
+  );
+}
 
 export function getCodemirrorTheme(resolved: ResolvedTheme): Extension[] {
-  return resolved === "dark" ? [darkTheme] : [lightTheme];
+  const vars = readEditorCssVars();
+  return [buildEditorTheme(vars, resolved === "dark")];
 }
 
 export function getEditorFontTheme(

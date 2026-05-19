@@ -25,11 +25,11 @@ export function SettingsHost(): JSX.Element {
       open={open}
       onOpenChange={(nextOpen) => setSettingsOpen(nextOpen)}
     >
-      <DialogContent key={locale} className="max-w-md">
+      <DialogContent key={locale} className="max-w-md gap-4">
         <DialogHeader>
           <DialogTitle>{t("settings.title")}</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="appearance" className="w-full">
+        <Tabs defaultValue="appearance" className="w-full space-y-4">
           <TabsList className="w-full">
             <TabsTrigger value="appearance" className="flex-1">
               {t("settings.tab.appearance")}

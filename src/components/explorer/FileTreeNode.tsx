@@ -5,20 +5,23 @@ import type { FlatTreeRow } from "@/components/explorer/flattenTree";
 interface FileTreeNodeProps {
   row: FlatTreeRow;
   isExpanded: boolean;
+  isActiveFile: boolean;
   onClick: () => void;
 }
 
 export function FileTreeNode({
   row,
   isExpanded,
+  isActiveFile,
   onClick,
 }: FileTreeNodeProps): JSX.Element {
   return (
     <button
       type="button"
       className={cn(
-        "flex h-6 w-full items-center gap-1 px-2 text-left text-xs hover:bg-accent/60",
-        "text-foreground",
+        "flex h-7 w-full items-center gap-1 rounded-sm px-2 text-left text-xs",
+        "text-sidebar-foreground hover:bg-sidebar-accent",
+        isActiveFile && "bg-sidebar-accent font-medium",
       )}
       style={{ paddingLeft: `${8 + row.depth * 12}px` }}
       onClick={onClick}
