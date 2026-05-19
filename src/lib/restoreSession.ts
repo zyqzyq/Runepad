@@ -63,28 +63,31 @@ export async function restoreSession(snapshot: SessionSnapshot): Promise<void> {
     useUiStore.getState().setTheme(snapshot.theme as ThemePreference);
   }
 
-  if (snapshot.explorerRoot) {
-    await loadExplorerTree(snapshot.explorerRoot, snapshot.expandedPaths);
-  }
-
   const sessionTabs = snapshot.tabs;
   for (let i = 0; i < restoredTabs.length; i++) {
     const tab = restoredTabs[i];
     const st = sessionTabs[i];
     if (!tab || !st) continue;
 
-    if (st.content != null) {
-      pendingInitialDocs.set(tab.id, st.content);
-      if (st.isDirty) {
-        tabStore.markDirty(tab.id, true);
-      }
-    } else if (tab.filepath) {
+    const hasCachedContent =
+      st.content != null && (st.content !== "" || st.isDirty || st.isNew);
+
+    if (tab.filepath && !hasCachedContent) {
       const ok = await reloadTabFromDisk(tab);
       if (!ok) {
         tabStore.closeTab(tab.id);
       }
+    } else if (st.content != null) {
+      pendingInitialDocs.set(tab.id, st.content);
+      if (st.isDirty) {
+        tabStore.markDirty(tab.id, true);
+      }
     } else {
       pendingInitialDocs.set(tab.id, "");
     }
+  }
+
+  if (snapshot.explorerRoot) {
+    await loadExplorerTree(snapshot.explorerRoot, snapshot.expandedPaths);
   }
 }

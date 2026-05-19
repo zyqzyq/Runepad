@@ -17,6 +17,7 @@ export async function reloadTabFromDisk(tab: Tab): Promise<boolean> {
       isDirty: false,
     });
     setEditorContent(tab.id, content);
+    useTabStore.getState().markDirty(tab.id, false);
     return true;
   } catch (e) {
     toast.error(
