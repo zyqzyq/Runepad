@@ -1,6 +1,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
+import { useI18n, toastErrorMessage } from "@/i18n";
 import { FileTreeNode } from "@/components/explorer/FileTreeNode";
 import { flattenTree } from "@/components/explorer/flattenTree";
 import { useExplorerActions } from "@/hooks/useExplorerActions";
@@ -9,6 +10,7 @@ import { useExplorerStore } from "@/stores/explorerStore";
 const ROW_HEIGHT = 24;
 
 export function FileTree(): JSX.Element {
+  const { t } = useI18n();
   const parentRef = useRef<HTMLDivElement>(null);
   const rootPath = useExplorerStore((s) => s.rootPath);
   const expandedPaths = useExplorerStore((s) => s.expandedPaths);
@@ -34,7 +36,7 @@ export function FileTree(): JSX.Element {
     if (!rootPath) return;
     if (childrenByPath[rootPath]) return;
     void loadDirectory(rootPath).catch((e) => {
-      toast.error(e instanceof Error ? e.message : String(e));
+      toast.error(toastErrorMessage(e));
       useExplorerStore.getState().closeRoot();
     });
   }, [rootPath, childrenByPath, loadDirectory]);
@@ -49,7 +51,7 @@ export function FileTree(): JSX.Element {
             try {
               await loadDirectory(row.path);
             } catch (e) {
-              toast.error(e instanceof Error ? e.message : String(e));
+              toast.error(toastErrorMessage(e));
               toggleExpand(row.path);
             }
           }
@@ -62,7 +64,7 @@ export function FileTree(): JSX.Element {
       try {
         await openFileAtPath(row.path);
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : String(e));
+        toast.error(toastErrorMessage(e));
       }
     },
     [isExpanded, loadDirectory, openFileAtPath, toggleExpand],
@@ -75,7 +77,7 @@ export function FileTree(): JSX.Element {
   if (rows.length === 0 && childrenByPath[rootPath]) {
     return (
       <div className="flex flex-1 items-center justify-center p-2 text-xs text-muted-foreground">
-        Empty folder
+        {t("explorer.emptyFolder")}
       </div>
     );
   }

@@ -1,6 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { getT, toastErrorMessage } from "@/i18n";
 import { loadSession, saveSession } from "@/api/sessionApi";
 import { finishWindowClose } from "@/api/windowApi";
 import { syncFileWatchesNow } from "@/hooks/useDirWatcher";
@@ -39,7 +40,7 @@ export function useSessionRestore(): void {
       await persistSessionSnapshot();
       lastPersistedAt.current = Date.now();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
+      toast.error(toastErrorMessage(e));
     }
   };
 
@@ -85,12 +86,18 @@ export function useSessionRestore(): void {
         const snapshot = await loadSession();
         if (snapshot && snapshot.tabs.length > 0) {
           await restoreSession(snapshot);
-          toast.success(`Restored ${snapshot.tabs.length} tab(s)`);
+          toast.success(
+            getT()("toast.sessionRestored", {
+              count: String(snapshot.tabs.length),
+            }),
+          );
           syncFileWatchesNow();
         }
       } catch (e) {
         toast.error(
-          `Session restore failed: ${e instanceof Error ? e.message : String(e)}`,
+          getT()("toast.sessionRestoreFailed", {
+            message: e instanceof Error ? e.message : String(e),
+          }),
         );
       } finally {
         restoreDone.current = true;

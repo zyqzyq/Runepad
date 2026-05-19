@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
+import { toastErrorMessage } from "@/i18n";
 import { readDir } from "@/api/dirApi";
 import { openFolderDialog } from "@/api/fileApi";
 import { openFileInTab } from "@/lib/openFileInTab";
@@ -35,7 +36,7 @@ export function useExplorerActions(): {
       await loadDirectory(selected);
     } catch (e) {
       useExplorerStore.getState().closeRoot();
-      toast.error(e instanceof Error ? e.message : String(e));
+      toast.error(toastErrorMessage(e));
     }
   }, [loadDirectory, openRoot]);
 

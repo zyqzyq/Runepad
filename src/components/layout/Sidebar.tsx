@@ -1,17 +1,19 @@
 import { PanelLeft, PanelLeftClose } from "lucide-react";
 import { FileTree } from "@/components/explorer/FileTree";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n";
 import { basename } from "@/lib/languageFromFilename";
 import { cn } from "@/lib/utils";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useUiStore } from "@/stores/uiStore";
 
 export function Sidebar(): JSX.Element {
+  const { t } = useI18n();
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const rootPath = useExplorerStore((s) => s.rootPath);
 
-  const title = rootPath ? basename(rootPath) : "Explorer";
+  const title = rootPath ? basename(rootPath) : t("sidebar.explorer");
 
   return (
     <aside
@@ -26,7 +28,7 @@ export function Sidebar(): JSX.Element {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
         >
           {collapsed ? (
             <PanelLeft className="h-4 w-4" />

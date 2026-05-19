@@ -1,35 +1,14 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { openDialog, saveDialog, writeFile } from "@/api/fileApi";
+import { getT, toastErrorMessage } from "@/i18n";
 import { useCloseTab } from "@/hooks/useCloseTab";
+import { getTextFileDialogFilters } from "@/lib/dialogFilters";
 import { basename, languageFromFilename } from "@/lib/languageFromFilename";
 import { editorInstances } from "@/lib/editorInstances";
 import { openFileInTab } from "@/lib/openFileInTab";
 import { useRecentFilesStore } from "@/stores/recentFilesStore";
 import { useTabStore } from "@/stores/tabStore";
-
-const TEXT_FILTERS = [
-  {
-    name: "Text files",
-    extensions: [
-      "txt",
-      "md",
-      "json",
-      "js",
-      "ts",
-      "tsx",
-      "jsx",
-      "css",
-      "html",
-      "xml",
-      "yaml",
-      "yml",
-      "rs",
-      "toml",
-    ],
-  },
-  { name: "All files", extensions: ["*"] },
-];
 
 export function useFileActions(): {
   newFile: () => void;
@@ -52,11 +31,11 @@ export function useFileActions(): {
 
   const openFile = useCallback(async () => {
     try {
-      const selected = await openDialog({ filters: TEXT_FILTERS });
+      const selected = await openDialog({ filters: getTextFileDialogFilters() });
       if (!selected || Array.isArray(selected)) return;
       await openFileInTab(selected);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
+      toast.error(toastErrorMessage(e));
     }
   }, []);
 
@@ -75,7 +54,7 @@ export function useFileActions(): {
         if (!path) {
           const selected = await saveDialog({
             defaultPath: tab.filename,
-            filters: TEXT_FILTERS,
+            filters: getTextFileDialogFilters(),
           });
           if (!selected) return false;
           path = selected;
@@ -98,7 +77,7 @@ export function useFileActions(): {
         useRecentFilesStore.getState().push(path);
         return true;
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : String(e));
+        toast.error(toastErrorMessage(e));
         return false;
       }
     },
@@ -112,7 +91,7 @@ export function useFileActions(): {
 
     const saved = await saveTabById(activeId);
     if (saved) {
-      toast.success(`Saved ${tab.filename}`);
+      toast.success(getT()("toast.saved", { filename: tab.filename }));
     }
   }, [activeId, getActiveTab, saveTabById]);
 

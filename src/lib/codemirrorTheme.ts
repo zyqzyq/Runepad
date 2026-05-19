@@ -23,3 +23,19 @@ const darkTheme = EditorView.theme(
 export function getCodemirrorTheme(resolved: ResolvedTheme): Extension[] {
   return resolved === "dark" ? [darkTheme] : [lightTheme];
 }
+
+export function getEditorFontTheme(
+  family: string,
+  sizePx: number,
+): Extension {
+  return EditorView.theme({
+    ".cm-content": {
+      fontFamily: family,
+      fontSize: `${sizePx}px`,
+    },
+    ".cm-gutters": {
+      fontFamily: family,
+      fontSize: `${sizePx}px`,
+    },
+  });
+}

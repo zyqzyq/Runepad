@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { untitledTabName } from "@/lib/untitledTabName";
 import type { LineEnding, Tab } from "@/types/tab";
 
 interface TabStore {
@@ -29,7 +30,7 @@ function createEmptyTab(): Tab {
   const n = untitledCounter++;
   return {
     id,
-    filename: n === 1 ? "Untitled" : `Untitled-${n - 1}`,
+    filename: untitledTabName(n),
     filepath: null,
     isDirty: false,
     isNew: true,

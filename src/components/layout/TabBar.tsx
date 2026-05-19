@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { GripVertical, X } from "lucide-react";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { useCloseTab } from "@/hooks/useCloseTab";
 import { useTabStore } from "@/stores/tabStore";
@@ -22,6 +23,7 @@ function isOverEditorSurface(clientX: number, clientY: number): boolean {
 }
 
 export function TabBar(): JSX.Element {
+  const { t } = useI18n();
   const tabs = useTabStore((s) => s.tabs);
   const activeId = useTabStore((s) => s.activeId);
   const setActiveTab = useTabStore((s) => s.setActiveTab);
@@ -182,7 +184,7 @@ export function TabBar(): JSX.Element {
                 "flex h-7 w-5 shrink-0 cursor-grab items-center justify-center rounded touch-none active:cursor-grabbing",
                 "text-muted-foreground/50 hover:text-muted-foreground",
               )}
-              aria-label={`Drag to reorder ${tab.filename}`}
+              aria-label={t("tab.dragReorder", { filename: tab.filename })}
               onPointerDown={(e) => handleDragHandlePointerDown(index, e)}
             >
               <GripVertical className="h-3 w-3" />
@@ -190,7 +192,7 @@ export function TabBar(): JSX.Element {
             {tab.isDirty && (
               <span
                 className="h-2 w-2 shrink-0 rounded-full bg-primary"
-                title="Unsaved changes"
+                title={t("tab.unsaved")}
               />
             )}
             <span className="min-w-0 flex-1 truncate px-1">{tab.filename}</span>
@@ -199,7 +201,7 @@ export function TabBar(): JSX.Element {
               className="shrink-0 cursor-pointer rounded p-0.5 opacity-0 hover:bg-muted group-hover:opacity-100"
               onClick={(e) => handleClose(tab.id, e)}
               onPointerDown={(e) => e.stopPropagation()}
-              aria-label={`Close ${tab.filename}`}
+              aria-label={t("tab.close", { filename: tab.filename })}
             >
               <X className="h-3 w-3" />
             </button>

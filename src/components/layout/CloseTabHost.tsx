@@ -11,13 +11,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { useCloseTab } from "@/hooks/useCloseTab";
 import { useFileActions } from "@/hooks/useFileActions";
+import { toastErrorMessage, useI18n } from "@/i18n";
 import { useCloseTabStore } from "@/stores/closeTabStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useTabStore } from "@/stores/tabStore";
 
 export function CloseTabHost(): JSX.Element {
   const pendingTabId = useCloseTabStore((s) => s.pendingTabId);
   const setPendingTabId = useCloseTabStore((s) => s.setPendingTabId);
   const tabs = useTabStore((s) => s.tabs);
+  const locale = useSettingsStore((s) => s.locale);
+  const { t } = useI18n();
   const { forceCloseTab } = useCloseTab();
   const { saveTabById } = useFileActions();
 
@@ -43,7 +47,7 @@ export function CloseTabHost(): JSX.Element {
         forceCloseTab(pendingTabId);
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
+      toast.error(toastErrorMessage(e));
     }
   }, [forceCloseTab, pendingTabId, saveTabById]);
 
@@ -54,22 +58,24 @@ export function CloseTabHost(): JSX.Element {
         if (!nextOpen) handleCancel();
       }}
     >
-      <DialogContent showCloseButton={false}>
+      <DialogContent key={locale} showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>Unsaved changes</DialogTitle>
+          <DialogTitle>{t("closeTab.title")}</DialogTitle>
           <DialogDescription>
-            &apos;{tab?.filename}&apos; has unsaved changes. Close without saving?
+            {t("closeTab.description", {
+              filename: tab?.filename ?? "",
+            })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={handleCancel}>
-            Cancel
+            {t("closeTab.cancel")}
           </Button>
           <Button type="button" variant="destructive" onClick={handleDiscard}>
-            Don&apos;t save
+            {t("closeTab.discard")}
           </Button>
           <Button type="button" onClick={() => void handleSaveAndClose()}>
-            Save
+            {t("closeTab.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

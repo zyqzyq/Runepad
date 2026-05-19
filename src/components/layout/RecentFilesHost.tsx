@@ -10,9 +10,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useI18n } from "@/i18n";
 import { displayPath } from "@/lib/pathDisplay";
 import { openFileInTab } from "@/lib/openFileInTab";
+import { toastErrorMessage } from "@/i18n";
 import { useRecentFilesStore } from "@/stores/recentFilesStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useUiStore } from "@/stores/uiStore";
 
 export function RecentFilesHost(): JSX.Element {
@@ -21,6 +24,8 @@ export function RecentFilesHost(): JSX.Element {
   const paths = useRecentFilesStore((s) => s.paths);
   const remove = useRecentFilesStore((s) => s.remove);
   const clear = useRecentFilesStore((s) => s.clear);
+  const locale = useSettingsStore((s) => s.locale);
+  const { t } = useI18n();
 
   const handleOpenPath = useCallback(
     async (path: string) => {
@@ -28,8 +33,7 @@ export function RecentFilesHost(): JSX.Element {
         await openFileInTab(path);
         setRecentFilesOpen(false);
       } catch (e) {
-        const message = e instanceof Error ? e.message : String(e);
-        toast.error(message);
+        toast.error(toastErrorMessage(e));
         remove(path);
       }
     },
@@ -41,13 +45,13 @@ export function RecentFilesHost(): JSX.Element {
       open={open}
       onOpenChange={(nextOpen) => setRecentFilesOpen(nextOpen)}
     >
-      <DialogContent className="max-w-lg">
+      <DialogContent key={locale} className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Recent files</DialogTitle>
+          <DialogTitle>{t("recent.title")}</DialogTitle>
           <DialogDescription>
             {paths.length === 0
-              ? "No recent files yet. Open or save a file to add it here."
-              : "Select a file to open."}
+              ? t("recent.description.empty")
+              : t("recent.description.list")}
           </DialogDescription>
         </DialogHeader>
         {paths.length > 0 && (
@@ -80,10 +84,10 @@ export function RecentFilesHost(): JSX.Element {
             disabled={paths.length === 0}
             onClick={clear}
           >
-            Clear list
+            {t("recent.clear")}
           </Button>
           <Button type="button" onClick={() => setRecentFilesOpen(false)}>
-            Close
+            {t("recent.close")}
           </Button>
         </DialogFooter>
       </DialogContent>

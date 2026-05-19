@@ -3,6 +3,7 @@ mod menu;
 mod utils;
 
 use commands::dir_ops::read_dir;
+use commands::menu_ops::set_app_menu_locale;
 use commands::file_ops::{read_file, write_file};
 use commands::session_ops::{
     clear_session, flush_session_cache, load_session, save_session, SessionCache,
@@ -11,9 +12,10 @@ use commands::system_ops::get_system_theme;
 use commands::watch_ops::{sync_watched_dirs, unwatch_dir, WatchState};
 use commands::window_ops::{finish_window_close, WINDOW_CLOSING_EVENT};
 use menu::{
-    init_app_menu, MENU_EDIT_ACTION_EVENT, MENU_EDIT_FIND, MENU_EDIT_REPLACE,
-    MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE, MENU_FILE_CLOSE_FOLDER, MENU_FILE_NEW,
-    MENU_FILE_OPEN, MENU_FILE_OPEN_FOLDER, MENU_FILE_RECENT, MENU_FILE_SAVE,
+    init_app_menu, MENU_APP_ACTION_EVENT, MENU_APP_SETTINGS, MENU_EDIT_ACTION_EVENT,
+    MENU_EDIT_FIND, MENU_EDIT_REPLACE, MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE,
+    MENU_FILE_CLOSE_FOLDER, MENU_FILE_NEW, MENU_FILE_OPEN, MENU_FILE_OPEN_FOLDER,
+    MENU_FILE_RECENT, MENU_FILE_SAVE,
 };
 use tauri::{Emitter, Manager, WindowEvent};
 
@@ -49,6 +51,8 @@ pub fn run() {
                 let _ = app.emit(MENU_FILE_ACTION_EVENT, id);
             } else if matches!(id, MENU_EDIT_FIND | MENU_EDIT_REPLACE) {
                 let _ = app.emit(MENU_EDIT_ACTION_EVENT, id);
+            } else if id == MENU_APP_SETTINGS {
+                let _ = app.emit(MENU_APP_ACTION_EVENT, id);
             }
         })
         .invoke_handler(tauri::generate_handler![
@@ -61,7 +65,8 @@ pub fn run() {
             clear_session,
             sync_watched_dirs,
             unwatch_dir,
-            finish_window_close
+            finish_window_close,
+            set_app_menu_locale
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

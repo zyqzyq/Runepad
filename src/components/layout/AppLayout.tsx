@@ -3,9 +3,11 @@ import { CloseTabHost } from "@/components/layout/CloseTabHost";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { StatusBar } from "@/components/layout/StatusBar";
 import { TabBar } from "@/components/layout/TabBar";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { SettingsHost } from "@/components/layout/SettingsHost";
 import { useAppMenu } from "@/hooks/useAppMenu";
+import { useAppSettings } from "@/hooks/useAppSettings";
 import { useAppTheme } from "@/hooks/useAppTheme";
+import { useSettingsMenu } from "@/hooks/useSettingsMenu";
 import { useEditMenu } from "@/hooks/useEditMenu";
 import { useEditorShortcuts } from "@/hooks/useEditorShortcuts";
 import { useDirWatcher } from "@/hooks/useDirWatcher";
@@ -15,7 +17,9 @@ import { useExplorerStore } from "@/stores/explorerStore";
 
 export function AppLayout(): JSX.Element {
   useAppTheme();
+  useAppSettings();
   useAppMenu();
+  useSettingsMenu();
   useEditMenu();
   useEditorShortcuts();
   useSessionRestore();
@@ -26,11 +30,9 @@ export function AppLayout(): JSX.Element {
     <div className="flex h-screen w-screen overflow-hidden">
       <CloseTabHost />
       <RecentFilesHost />
+      <SettingsHost />
       {rootPath !== null && <Sidebar />}
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-9 shrink-0 items-center justify-end border-b border-border px-2">
-          <ThemeToggle />
-        </div>
         <TabBar />
         <EditorArea />
         <StatusBar />

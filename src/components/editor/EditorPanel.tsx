@@ -9,13 +9,14 @@ import {
   lineNumbers,
 } from "@codemirror/view";
 import { useEffect, useRef } from "react";
-import { getCodemirrorTheme } from "@/lib/codemirrorTheme";
+import { getCodemirrorTheme, getEditorFontTheme } from "@/lib/codemirrorTheme";
 import { getLanguageExtension } from "@/lib/codemirrorLanguages";
 import { closeFindPanelIfOpen, toggleFindPanel } from "@/lib/editorSearch";
 import { destroyEditorInstance, editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 import { useEditorStore } from "@/stores/editorStore";
 import { useTabStore } from "@/stores/tabStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useUiStore } from "@/stores/uiStore";
 
 interface EditorPanelProps {
@@ -42,8 +43,11 @@ export function EditorPanel({
 }: EditorPanelProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const themeCompartment = useRef(new Compartment()).current;
+  const fontCompartment = useRef(new Compartment()).current;
   const languageCompartment = useRef(new Compartment()).current;
   const resolvedTheme = useUiStore((s) => s.resolvedTheme);
+  const editorFontFamily = useSettingsStore((s) => s.editorFontFamily);
+  const editorFontSize = useSettingsStore((s) => s.editorFontSize);
   const markDirty = useTabStore((s) => s.markDirty);
   const setMeta = useEditorStore((s) => s.setMeta);
 
@@ -86,7 +90,15 @@ export function EditorPanel({
           ]),
         ),
         keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
-        themeCompartment.of(getCodemirrorTheme(resolvedTheme)),
+        themeCompartment.of(
+          getCodemirrorTheme(useUiStore.getState().resolvedTheme),
+        ),
+        fontCompartment.of(
+          getEditorFontTheme(
+            useSettingsStore.getState().editorFontFamily,
+            useSettingsStore.getState().editorFontSize,
+          ),
+        ),
         languageCompartment.of(languageExtensions(language)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
@@ -106,7 +118,7 @@ export function EditorPanel({
     return () => {
       destroyEditorInstance(docId);
     };
-  }, [docId, languageCompartment, markDirty, setMeta, themeCompartment]);
+  }, [docId, fontCompartment, languageCompartment, markDirty, setMeta, themeCompartment]);
 
   useEffect(() => {
     const view = editorInstances.get(docId);
@@ -115,6 +127,16 @@ export function EditorPanel({
       effects: themeCompartment.reconfigure(getCodemirrorTheme(resolvedTheme)),
     });
   }, [docId, resolvedTheme, themeCompartment]);
+
+  useEffect(() => {
+    const view = editorInstances.get(docId);
+    if (!view) return;
+    view.dispatch({
+      effects: fontCompartment.reconfigure(
+        getEditorFontTheme(editorFontFamily, editorFontSize),
+      ),
+    });
+  }, [docId, editorFontFamily, editorFontSize, fontCompartment]);
 
   useEffect(() => {
     const view = editorInstances.get(docId);

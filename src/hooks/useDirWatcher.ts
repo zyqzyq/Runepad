@@ -1,6 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { getT } from "@/i18n";
 import {
   readDir,
   syncWatchedDirs,
@@ -40,7 +41,9 @@ export function useDirWatcher(): void {
       }
     } catch (e) {
       toast.error(
-        `File watch failed: ${e instanceof Error ? e.message : String(e)}`,
+        getT()("toast.fileWatchFailed", {
+          message: e instanceof Error ? e.message : String(e),
+        }),
       );
     }
   };
@@ -92,7 +95,7 @@ export function useDirWatcher(): void {
 
         if (tab.isDirty) {
           toast.info(
-            `${tab.filename} was changed on disk (tab has unsaved edits)`,
+            getT()("toast.fileChangedOnDisk", { filename: tab.filename }),
           );
           continue;
         }

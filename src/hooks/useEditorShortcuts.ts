@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useFileActions } from "@/hooks/useFileActions";
+import { useUiStore } from "@/stores/uiStore";
 
 function isModKey(e: KeyboardEvent): boolean {
   const isMac = navigator.platform.toUpperCase().includes("MAC");
@@ -26,6 +27,9 @@ export function useEditorShortcuts(): void {
       } else if (key === "w") {
         e.preventDefault();
         closeActiveTab();
+      } else if (key === ",") {
+        e.preventDefault();
+        useUiStore.getState().setSettingsOpen(true);
       }
     };
 
