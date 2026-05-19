@@ -1,16 +1,21 @@
-import { javascript } from "@codemirror/lang-javascript";
-import { json } from "@codemirror/lang-json";
-import { markdown } from "@codemirror/lang-markdown";
 import type { Extension } from "@codemirror/state";
 
-export function getLanguageExtension(language: string): Extension | null {
+export async function loadLanguageExtension(
+  language: string,
+): Promise<Extension | null> {
   switch (language) {
-    case "javascript":
+    case "javascript": {
+      const { javascript } = await import("@codemirror/lang-javascript");
       return javascript({ typescript: true, jsx: true });
-    case "json":
+    }
+    case "json": {
+      const { json } = await import("@codemirror/lang-json");
       return json();
-    case "markdown":
+    }
+    case "markdown": {
+      const { markdown } = await import("@codemirror/lang-markdown");
       return markdown();
+    }
     default:
       return null;
   }

@@ -40,11 +40,9 @@ function createEmptyTab(): Tab {
   };
 }
 
-const initialTab = createEmptyTab();
-
 export const useTabStore = create<TabStore>((set, get) => ({
-  tabs: [initialTab],
-  activeId: initialTab.id,
+  tabs: [],
+  activeId: null,
 
   addNewTab: () => {
     const tab = createEmptyTab();

@@ -6,7 +6,15 @@ import type { Tab } from "@/types/tab";
 import { toast } from "sonner";
 import { getT } from "@/i18n";
 
-export async function reloadTabFromDisk(tab: Tab): Promise<boolean> {
+interface LoadTabContentOptions {
+  showErrorToast?: boolean;
+}
+
+export async function loadTabContentFromDisk(
+  tab: Tab,
+  options: LoadTabContentOptions = {},
+): Promise<boolean> {
+  const { showErrorToast = true } = options;
   if (!tab.filepath) return false;
   try {
     const { content, encoding, lineEnding } = await readFile(tab.filepath);
@@ -20,12 +28,18 @@ export async function reloadTabFromDisk(tab: Tab): Promise<boolean> {
     useTabStore.getState().markDirty(tab.id, false);
     return true;
   } catch (e) {
-    toast.error(
-      getT()("toast.reloadFailed", {
-        filename: tab.filename,
-        message: e instanceof Error ? e.message : String(e),
-      }),
-    );
+    if (showErrorToast) {
+      toast.error(
+        getT()("toast.reloadFailed", {
+          filename: tab.filename,
+          message: e instanceof Error ? e.message : String(e),
+        }),
+      );
+    }
     return false;
   }
+}
+
+export async function reloadTabFromDisk(tab: Tab): Promise<boolean> {
+  return loadTabContentFromDisk(tab);
 }

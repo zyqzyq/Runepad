@@ -2,7 +2,7 @@ import { readDir } from "@/api/dirApi";
 import { disposeTabEditor } from "@/lib/editorInstances";
 import { languageFromFilename } from "@/lib/languageFromFilename";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
-import { reloadTabFromDisk } from "@/lib/reloadTabFromDisk";
+import { loadTabContentFromDisk } from "@/lib/reloadTabFromDisk";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useTabStore } from "@/stores/tabStore";
 import { useUiStore, type ThemePreference } from "@/stores/uiStore";
@@ -26,6 +26,27 @@ function sessionTabToTab(st: SessionTab): Tab {
   };
 }
 
+function sessionTabHasCachedContent(st: SessionTab): boolean {
+  return (
+    st.content != null && (st.content !== "" || st.isDirty || st.isNew)
+  );
+}
+
+function applyCachedSessionContent(tab: Tab, st: SessionTab): void {
+  if (st.content != null) {
+    pendingInitialDocs.set(tab.id, st.content);
+    if (st.isDirty) {
+      useTabStore.getState().markDirty(tab.id, true);
+    }
+    return;
+  }
+  pendingInitialDocs.set(tab.id, "");
+}
+
+function tabNeedsDiskLoad(tab: Tab, st: SessionTab): boolean {
+  return Boolean(tab.filepath && !sessionTabHasCachedContent(st));
+}
+
 async function loadExplorerTree(
   root: string,
   expandedPaths: string[],
@@ -44,6 +65,39 @@ async function loadExplorerTree(
   }
 }
 
+function restoreSessionInBackground(
+  restoredTabs: Tab[],
+  sessionTabs: SessionTab[],
+  activeTabId: string | null,
+  snapshot: SessionSnapshot,
+): void {
+  void (async () => {
+    const tabStore = useTabStore.getState();
+
+    const loads = restoredTabs
+      .map((tab, i) => {
+        const st = sessionTabs[i];
+        if (!tab || !st || tab.id === activeTabId) return null;
+        if (!tabNeedsDiskLoad(tab, st)) return null;
+        return loadTabContentFromDisk(tab, { showErrorToast: false }).then(
+          (ok) => {
+            if (!ok) {
+              tabStore.closeTab(tab.id);
+            }
+          },
+        );
+      })
+      .filter((task): task is Promise<void> => task !== null);
+
+    await Promise.all(loads);
+
+    if (snapshot.explorerRoot) {
+      await loadExplorerTree(snapshot.explorerRoot, snapshot.expandedPaths);
+    }
+  })();
+}
+
+/** Restores UI and active-tab content; other tabs and explorer load in the background. */
 export async function restoreSession(snapshot: SessionSnapshot): Promise<void> {
   const tabStore = useTabStore.getState();
 
@@ -51,9 +105,20 @@ export async function restoreSession(snapshot: SessionSnapshot): Promise<void> {
     disposeTabEditor(tab.id);
   }
 
-  const restoredTabs = snapshot.tabs.map(sessionTabToTab);
-  const activeTab = restoredTabs[snapshot.activeIndex] ?? restoredTabs[0];
-  tabStore.replaceTabs(restoredTabs, activeTab?.id ?? null);
+  const sessionTabs = snapshot.tabs;
+  const restoredTabs = sessionTabs.map(sessionTabToTab);
+  const activeTab =
+    restoredTabs[snapshot.activeIndex] ?? restoredTabs[0] ?? null;
+
+  for (let i = 0; i < restoredTabs.length; i++) {
+    const tab = restoredTabs[i];
+    const st = sessionTabs[i];
+    if (!tab || !st) continue;
+
+    if (sessionTabHasCachedContent(st) || !tab.filepath) {
+      applyCachedSessionContent(tab, st);
+    }
+  }
 
   if (
     snapshot.theme === "light" ||
@@ -63,31 +128,23 @@ export async function restoreSession(snapshot: SessionSnapshot): Promise<void> {
     useUiStore.getState().setTheme(snapshot.theme as ThemePreference);
   }
 
-  const sessionTabs = snapshot.tabs;
-  for (let i = 0; i < restoredTabs.length; i++) {
-    const tab = restoredTabs[i];
-    const st = sessionTabs[i];
-    if (!tab || !st) continue;
+  tabStore.replaceTabs(restoredTabs, activeTab?.id ?? null);
 
-    const hasCachedContent =
-      st.content != null && (st.content !== "" || st.isDirty || st.isNew);
-
-    if (tab.filepath && !hasCachedContent) {
-      const ok = await reloadTabFromDisk(tab);
+  if (activeTab) {
+    const activeIndex = restoredTabs.indexOf(activeTab);
+    const activeSession = sessionTabs[activeIndex];
+    if (activeSession && tabNeedsDiskLoad(activeTab, activeSession)) {
+      const ok = await loadTabContentFromDisk(activeTab);
       if (!ok) {
-        tabStore.closeTab(tab.id);
+        tabStore.closeTab(activeTab.id);
       }
-    } else if (st.content != null) {
-      pendingInitialDocs.set(tab.id, st.content);
-      if (st.isDirty) {
-        tabStore.markDirty(tab.id, true);
-      }
-    } else {
-      pendingInitialDocs.set(tab.id, "");
     }
   }
 
-  if (snapshot.explorerRoot) {
-    await loadExplorerTree(snapshot.explorerRoot, snapshot.expandedPaths);
-  }
+  restoreSessionInBackground(
+    restoredTabs,
+    sessionTabs,
+    activeTab?.id ?? null,
+    snapshot,
+  );
 }

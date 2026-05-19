@@ -92,6 +92,8 @@ export function useSessionRestore(): void {
             }),
           );
           syncFileWatchesNow();
+        } else if (useTabStore.getState().tabs.length === 0) {
+          useTabStore.getState().addNewTab();
         }
       } catch (e) {
         toast.error(

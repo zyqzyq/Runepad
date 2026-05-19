@@ -10,7 +10,7 @@ import {
 } from "@codemirror/view";
 import { useEffect, useRef } from "react";
 import { getCodemirrorTheme, getEditorFontTheme } from "@/lib/codemirrorTheme";
-import { getLanguageExtension } from "@/lib/codemirrorLanguages";
+import { loadLanguageExtension } from "@/lib/codemirrorLanguages";
 import { closeFindPanelIfOpen, toggleFindPanel } from "@/lib/editorSearch";
 import { destroyEditorInstance, editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
@@ -31,8 +31,7 @@ function countWords(text: string): number {
   return trimmed.split(/\s+/).length;
 }
 
-function languageExtensions(language: string): Extension[] {
-  const ext = getLanguageExtension(language);
+function toLanguageExtensions(ext: Extension | null): Extension[] {
   return ext ? [ext] : [];
 }
 
@@ -99,7 +98,7 @@ export function EditorPanel({
             useSettingsStore.getState().editorFontSize,
           ),
         ),
-        languageCompartment.of(languageExtensions(language)),
+        languageCompartment.of([]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             markDirty(docId, true);
@@ -114,11 +113,22 @@ export function EditorPanel({
     const view = new EditorView({ state, parent });
     editorInstances.set(docId, view);
     updateMeta(view);
+    if (isActive) {
+      view.focus();
+    }
 
     return () => {
       destroyEditorInstance(docId);
     };
-  }, [docId, fontCompartment, languageCompartment, markDirty, setMeta, themeCompartment]);
+  }, [
+    docId,
+    fontCompartment,
+    isActive,
+    languageCompartment,
+    markDirty,
+    setMeta,
+    themeCompartment,
+  ]);
 
   useEffect(() => {
     const view = editorInstances.get(docId);
@@ -141,10 +151,24 @@ export function EditorPanel({
   useEffect(() => {
     const view = editorInstances.get(docId);
     if (!view) return;
-    view.dispatch({
-      effects: languageCompartment.reconfigure(languageExtensions(language)),
+
+    let cancelled = false;
+    void loadLanguageExtension(language).then((ext) => {
+      if (cancelled) return;
+      view.dispatch({
+        effects: languageCompartment.reconfigure(toLanguageExtensions(ext)),
+      });
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [docId, language, languageCompartment]);
+
+  useEffect(() => {
+    if (!isActive) return;
+    editorInstances.get(docId)?.focus();
+  }, [docId, isActive]);
 
   return (
     <div
