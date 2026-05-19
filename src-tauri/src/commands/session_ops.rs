@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
 const SESSION_FILE: &str = "session.json";
@@ -33,6 +34,15 @@ pub struct SessionSnapshot {
     pub theme: Option<String>,
 }
 
+// In-memory staging for session snapshots; flushed on app exit.
+pub struct SessionCache(pub Mutex<Option<SessionSnapshot>>);
+
+impl Default for SessionCache {
+    fn default() -> Self {
+        Self(Mutex::new(None))
+    }
+}
+
 fn session_path(app: &AppHandle) -> Result<PathBuf, String> {
     let dir = app
         .path()
@@ -41,15 +51,23 @@ fn session_path(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(dir.join(SESSION_FILE))
 }
 
-#[tauri::command]
-pub async fn save_session(app: AppHandle, session: SessionSnapshot) -> Result<(), String> {
-    let path = session_path(&app)?;
+fn stage_session(cache: &SessionCache, session: &SessionSnapshot) -> Result<(), String> {
+    let mut guard = cache
+        .0
+        .lock()
+        .map_err(|e| format!("Session cache lock failed: {e}"))?;
+    *guard = Some(session.clone());
+    Ok(())
+}
+
+async fn write_session_to_disk(app: &AppHandle, session: &SessionSnapshot) -> Result<(), String> {
+    let path = session_path(app)?;
     if let Some(parent) = path.parent() {
         tokio::fs::create_dir_all(parent)
             .await
             .map_err(|e| format!("Cannot create session directory: {e}"))?;
     }
-    let json = serde_json::to_string_pretty(&session)
+    let json = serde_json::to_string_pretty(session)
         .map_err(|e| format!("Failed to serialize session: {e}"))?;
     if json.len() > MAX_SESSION_BYTES {
         return Err(format!(
@@ -61,6 +79,31 @@ pub async fn save_session(app: AppHandle, session: SessionSnapshot) -> Result<()
         .await
         .map_err(|e| format!("Failed to write session: {e}"))?;
     Ok(())
+}
+
+// Flush the latest staged snapshot to disk (used on app exit).
+pub fn flush_session_cache(app: &AppHandle, cache: &SessionCache) -> Result<(), String> {
+    let session = {
+        let guard = cache
+            .0
+            .lock()
+            .map_err(|e| format!("Session cache lock failed: {e}"))?;
+        guard.clone()
+    };
+    match session {
+        Some(snapshot) => tauri::async_runtime::block_on(write_session_to_disk(app, &snapshot)),
+        None => Ok(()),
+    }
+}
+
+#[tauri::command]
+pub async fn save_session(
+    app: AppHandle,
+    cache: tauri::State<'_, SessionCache>,
+    session: SessionSnapshot,
+) -> Result<(), String> {
+    stage_session(&cache, &session)?;
+    write_session_to_disk(&app, &session).await
 }
 
 #[tauri::command]
@@ -78,7 +121,17 @@ pub async fn load_session(app: AppHandle) -> Result<Option<SessionSnapshot>, Str
 }
 
 #[tauri::command]
-pub async fn clear_session(app: AppHandle) -> Result<(), String> {
+pub async fn clear_session(
+    app: AppHandle,
+    cache: tauri::State<'_, SessionCache>,
+) -> Result<(), String> {
+    {
+        let mut guard = cache
+            .0
+            .lock()
+            .map_err(|e| format!("Session cache lock failed: {e}"))?;
+        *guard = None;
+    }
     let path = session_path(&app)?;
     if path.exists() {
         tokio::fs::remove_file(&path)

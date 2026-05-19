@@ -4,15 +4,18 @@ mod utils;
 
 use commands::dir_ops::read_dir;
 use commands::file_ops::{read_file, write_file};
-use commands::session_ops::{clear_session, load_session, save_session};
+use commands::session_ops::{
+    clear_session, flush_session_cache, load_session, save_session, SessionCache,
+};
 use commands::system_ops::get_system_theme;
 use commands::watch_ops::{sync_watched_dirs, unwatch_dir, WatchState};
+use commands::window_ops::{finish_window_close, WINDOW_CLOSING_EVENT};
 use menu::{
     init_app_menu, MENU_EDIT_ACTION_EVENT, MENU_EDIT_FIND, MENU_EDIT_REPLACE,
     MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE, MENU_FILE_CLOSE_FOLDER, MENU_FILE_NEW,
     MENU_FILE_OPEN, MENU_FILE_OPEN_FOLDER, MENU_FILE_RECENT, MENU_FILE_SAVE,
 };
-use tauri::Emitter;
+use tauri::{Emitter, Manager, WindowEvent};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -20,9 +23,16 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .manage(WatchState::default())
+        .manage(SessionCache::default())
         .setup(|app| {
             init_app_menu(app)?;
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let _ = window.emit(WINDOW_CLOSING_EVENT, ());
+            }
         })
         .on_menu_event(|app, event| {
             let id = event.id().as_ref();
@@ -50,8 +60,16 @@ pub fn run() {
             load_session,
             clear_session,
             sync_watched_dirs,
-            unwatch_dir
+            unwatch_dir,
+            finish_window_close
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while running tauri application")
+        .run(|app_handle, event| {
+            if let tauri::RunEvent::ExitRequested { .. } = event {
+                if let Some(cache) = app_handle.try_state::<SessionCache>() {
+                    let _ = flush_session_cache(app_handle, &cache);
+                }
+            }
+        });
 }
