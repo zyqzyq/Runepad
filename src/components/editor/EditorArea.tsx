@@ -11,7 +11,14 @@ const EditorPanel = lazy(() =>
 );
 
 function EditorAreaFallback(): JSX.Element {
-  return <div className="h-full w-full bg-[var(--editor-background)]" />;
+  return (
+    <div className="flex h-full w-full bg-[var(--editor-background)] text-[13px] text-[var(--editor-foreground)]">
+      <div className="h-full w-12 shrink-0 border-r border-border/30 bg-[var(--editor-gutter-bg)] px-2 py-2 text-right text-[12px] leading-5 text-[var(--editor-gutter-fg)]">
+        1
+      </div>
+      <div className="min-w-0 flex-1 px-3 py-2 font-mono leading-5" />
+    </div>
+  );
 }
 
 export function EditorArea(): JSX.Element {
@@ -44,7 +51,9 @@ export function EditorArea(): JSX.Element {
             language={activeTab.language}
             isActive
           />
-        ) : null}
+        ) : (
+          <EditorAreaFallback />
+        )}
       </Suspense>
     </div>
   );

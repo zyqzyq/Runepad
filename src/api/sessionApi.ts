@@ -11,6 +11,10 @@ export async function loadSession(): Promise<SessionSnapshot | null> {
   return invoke<SessionSnapshot | null>("load_session");
 }
 
+export async function loadSessionPreview(): Promise<SessionSnapshot | null> {
+  return invoke<SessionSnapshot | null>("load_session_preview");
+}
+
 export async function clearSession(): Promise<void> {
   await invoke("clear_session");
 }

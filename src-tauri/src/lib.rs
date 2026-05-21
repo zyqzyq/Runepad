@@ -6,7 +6,8 @@ use commands::dir_ops::read_dir;
 use commands::menu_ops::set_app_menu_locale;
 use commands::file_ops::{read_file, write_file};
 use commands::session_ops::{
-    clear_session, flush_session_cache, load_session, save_session, SessionCache,
+    clear_session, flush_session_cache, load_session, load_session_preview, save_session,
+    SessionCache,
 };
 use commands::system_ops::get_system_theme;
 use commands::watch_ops::{sync_watched_dirs, unwatch_dir, WatchState};
@@ -62,6 +63,7 @@ pub fn run() {
             get_system_theme,
             save_session,
             load_session,
+            load_session_preview,
             clear_session,
             sync_watched_dirs,
             unwatch_dir,

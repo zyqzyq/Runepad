@@ -14,6 +14,7 @@ import { loadLanguageExtension } from "@/lib/codemirrorLanguages";
 import { closeFindPanelIfOpen, toggleFindPanel } from "@/lib/editorSearch";
 import { destroyEditorInstance, editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
+import { startupMeasure } from "@/lib/startupPerf";
 import { useEditorStore } from "@/stores/editorStore";
 import { useTabStore } from "@/stores/tabStore";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -115,6 +116,7 @@ export function EditorPanel({
     updateMeta(view);
     if (isActive) {
       view.focus();
+      startupMeasure("editor-mounted", "start");
     }
 
     return () => {

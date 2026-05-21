@@ -6,6 +6,7 @@ use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
 const SESSION_FILE: &str = "session.json";
+const SESSION_PREVIEW_FILE: &str = "session.preview.json";
 const MAX_SESSION_BYTES: usize = 8 * 1024 * 1024;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,6 +35,85 @@ pub struct SessionSnapshot {
     pub theme: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SessionTabPreview {
+    pub filepath: Option<String>,
+    pub filename: String,
+    pub is_new: bool,
+    pub encoding: String,
+    pub line_ending: String,
+    pub language: String,
+    #[serde(default)]
+    pub is_dirty: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SessionPreview {
+    pub version: u32,
+    pub active_index: usize,
+    pub tabs: Vec<SessionTabPreview>,
+    pub explorer_root: Option<String>,
+    pub expanded_paths: Vec<String>,
+    pub theme: Option<String>,
+}
+
+impl From<SessionTabPreview> for SessionTab {
+    fn from(tab: SessionTabPreview) -> Self {
+        Self {
+            filepath: tab.filepath,
+            filename: tab.filename,
+            is_new: tab.is_new,
+            encoding: tab.encoding,
+            line_ending: tab.line_ending,
+            language: tab.language,
+            content: None,
+            is_dirty: tab.is_dirty,
+        }
+    }
+}
+
+impl From<SessionPreview> for SessionSnapshot {
+    fn from(session: SessionPreview) -> Self {
+        Self {
+            version: session.version,
+            active_index: session.active_index,
+            tabs: session.tabs.into_iter().map(SessionTab::from).collect(),
+            explorer_root: session.explorer_root,
+            expanded_paths: session.expanded_paths,
+            theme: session.theme,
+        }
+    }
+}
+
+impl From<&SessionTab> for SessionTabPreview {
+    fn from(tab: &SessionTab) -> Self {
+        Self {
+            filepath: tab.filepath.clone(),
+            filename: tab.filename.clone(),
+            is_new: tab.is_new,
+            encoding: tab.encoding.clone(),
+            line_ending: tab.line_ending.clone(),
+            language: tab.language.clone(),
+            is_dirty: tab.is_dirty,
+        }
+    }
+}
+
+impl From<&SessionSnapshot> for SessionPreview {
+    fn from(session: &SessionSnapshot) -> Self {
+        Self {
+            version: session.version,
+            active_index: session.active_index,
+            tabs: session.tabs.iter().map(SessionTabPreview::from).collect(),
+            explorer_root: session.explorer_root.clone(),
+            expanded_paths: session.expanded_paths.clone(),
+            theme: session.theme.clone(),
+        }
+    }
+}
+
 // In-memory staging for session snapshots; flushed on app exit.
 pub struct SessionCache(pub Mutex<Option<SessionSnapshot>>);
 
@@ -49,6 +129,14 @@ fn session_path(app: &AppHandle) -> Result<PathBuf, String> {
         .app_data_dir()
         .map_err(|e| format!("Cannot resolve app data directory: {e}"))?;
     Ok(dir.join(SESSION_FILE))
+}
+
+fn session_preview_path(app: &AppHandle) -> Result<PathBuf, String> {
+    let dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Cannot resolve app data directory: {e}"))?;
+    Ok(dir.join(SESSION_PREVIEW_FILE))
 }
 
 fn stage_session(cache: &SessionCache, session: &SessionSnapshot) -> Result<(), String> {
@@ -78,6 +166,26 @@ async fn write_session_to_disk(app: &AppHandle, session: &SessionSnapshot) -> Re
     tokio::fs::write(&path, json)
         .await
         .map_err(|e| format!("Failed to write session: {e}"))?;
+    write_session_preview_to_disk(app, session).await?;
+    Ok(())
+}
+
+async fn write_session_preview_to_disk(
+    app: &AppHandle,
+    session: &SessionSnapshot,
+) -> Result<(), String> {
+    let path = session_preview_path(app)?;
+    if let Some(parent) = path.parent() {
+        tokio::fs::create_dir_all(parent)
+            .await
+            .map_err(|e| format!("Cannot create session directory: {e}"))?;
+    }
+    let preview = SessionPreview::from(session);
+    let json = serde_json::to_string(&preview)
+        .map_err(|e| format!("Failed to serialize session preview: {e}"))?;
+    tokio::fs::write(&path, json)
+        .await
+        .map_err(|e| format!("Failed to write session preview: {e}"))?;
     Ok(())
 }
 
@@ -117,7 +225,22 @@ pub async fn load_session(app: AppHandle) -> Result<Option<SessionSnapshot>, Str
         .map_err(|e| format!("Failed to read session: {e}"))?;
     let session: SessionSnapshot = serde_json::from_slice(&bytes)
         .map_err(|e| format!("Failed to parse session: {e}"))?;
+    let _ = write_session_preview_to_disk(&app, &session).await;
     Ok(Some(session))
+}
+
+#[tauri::command]
+pub async fn load_session_preview(app: AppHandle) -> Result<Option<SessionSnapshot>, String> {
+    let path = session_preview_path(&app)?;
+    if !path.exists() {
+        return Ok(None);
+    }
+    let bytes = tokio::fs::read(&path)
+        .await
+        .map_err(|e| format!("Failed to read session: {e}"))?;
+    let session: SessionPreview = serde_json::from_slice(&bytes)
+        .map_err(|e| format!("Failed to parse session: {e}"))?;
+    Ok(Some(session.into()))
 }
 
 #[tauri::command]
@@ -137,6 +260,12 @@ pub async fn clear_session(
         tokio::fs::remove_file(&path)
             .await
             .map_err(|e| format!("Failed to remove session: {e}"))?;
+    }
+    let preview_path = session_preview_path(&app)?;
+    if preview_path.exists() {
+        tokio::fs::remove_file(&preview_path)
+            .await
+            .map_err(|e| format!("Failed to remove session preview: {e}"))?;
     }
     Ok(())
 }

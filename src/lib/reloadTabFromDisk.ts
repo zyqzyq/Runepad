@@ -1,6 +1,7 @@
 import { readFile } from "@/api/fileApi";
 import { languageFromFilename } from "@/lib/languageFromFilename";
 import { setEditorContent } from "@/lib/setEditorContent";
+import { startupEvent, startupMark, startupMeasure } from "@/lib/startupPerf";
 import { useTabStore } from "@/stores/tabStore";
 import type { Tab } from "@/types/tab";
 import { toast } from "sonner";
@@ -16,6 +17,9 @@ export async function loadTabContentFromDisk(
 ): Promise<boolean> {
   const { showErrorToast = true } = options;
   if (!tab.filepath) return false;
+  const mark = `tab-content-load-start-${tab.id}`;
+  startupMark(mark);
+  startupEvent("tab-content-load-start", `filename=${tab.filename}`);
   try {
     const { content, encoding, lineEnding } = await readFile(tab.filepath);
     useTabStore.getState().updateTab(tab.id, {
@@ -26,6 +30,11 @@ export async function loadTabContentFromDisk(
     });
     setEditorContent(tab.id, content);
     useTabStore.getState().markDirty(tab.id, false);
+    startupMeasure(`tab-content-load:${tab.filename}`, mark);
+    startupEvent(
+      "tab-content-load-end",
+      `filename=${tab.filename} chars=${content.length}`,
+    );
     return true;
   } catch (e) {
     if (showErrorToast) {
@@ -36,6 +45,7 @@ export async function loadTabContentFromDisk(
         }),
       );
     }
+    startupMeasure(`tab-content-load-failed:${tab.filename}`, mark);
     return false;
   }
 }

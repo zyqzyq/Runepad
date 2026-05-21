@@ -1,11 +1,16 @@
 import { useEffect } from "react";
-import { getSystemTheme } from "@/api/systemApi";
 import { useUiStore, type ResolvedTheme, type ThemePreference } from "@/stores/uiStore";
 
-async function resolveTheme(preference: ThemePreference): Promise<ResolvedTheme> {
+function getBrowserSystemTheme(): ResolvedTheme {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function resolveTheme(preference: ThemePreference): ResolvedTheme {
   if (preference === "light") return "light";
   if (preference === "dark") return "dark";
-  return getSystemTheme();
+  return getBrowserSystemTheme();
 }
 
 export function useAppTheme(): void {
@@ -15,14 +20,14 @@ export function useAppTheme(): void {
   useEffect(() => {
     let cancelled = false;
 
-    const apply = async (): Promise<void> => {
-      const resolved = await resolveTheme(theme);
+    const apply = (): void => {
+      const resolved = resolveTheme(theme);
       if (cancelled) return;
       setResolvedTheme(resolved);
       document.documentElement.classList.toggle("dark", resolved === "dark");
     };
 
-    void apply();
+    apply();
 
     if (theme !== "system") {
       return () => {
@@ -32,7 +37,7 @@ export function useAppTheme(): void {
 
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = (): void => {
-      void apply();
+      apply();
     };
     mq.addEventListener("change", onChange);
     return () => {

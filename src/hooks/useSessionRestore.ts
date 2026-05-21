@@ -2,12 +2,13 @@ import { listen } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { getT, toastErrorMessage } from "@/i18n";
-import { loadSession, saveSession } from "@/api/sessionApi";
+import { loadSession, loadSessionPreview, saveSession } from "@/api/sessionApi";
 import { finishWindowClose } from "@/api/windowApi";
 import { syncFileWatchesNow } from "@/hooks/useDirWatcher";
 import { buildSessionSnapshot } from "@/lib/buildSessionSnapshot";
 import { persistSessionSnapshot } from "@/lib/persistSession";
 import { restoreSession } from "@/lib/restoreSession";
+import { startupMark, startupMeasure } from "@/lib/startupPerf";
 import { useEditorStore } from "@/stores/editorStore";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useTabStore } from "@/stores/tabStore";
@@ -16,6 +17,14 @@ import { useUiStore } from "@/stores/uiStore";
 const SAVE_DEBOUNCE_MS = 2000;
 const DIRTY_SAVE_DEBOUNCE_MS = 500;
 const WINDOW_CLOSING_EVENT = "runepad://window-closing";
+
+function waitForNextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
+}
 
 function getDebounceMs(): number {
   const hasDirty = useTabStore.getState().tabs.some((t) => t.isDirty);
@@ -82,17 +91,38 @@ export function useSessionRestore(): void {
     restoreStarted.current = true;
 
     const run = async (): Promise<void> => {
+      let restoredPreview = false;
       try {
+        startupMark("session-preview-load-start");
+        const preview = await loadSessionPreview();
+        startupMeasure("session-preview-load", "session-preview-load-start");
+        if (preview && preview.tabs.length > 0) {
+          await restoreSession(preview, {
+            awaitActiveTabLoad: true,
+            awaitExplorerRootLoad: true,
+          });
+          restoredPreview = true;
+          syncFileWatchesNow();
+          await waitForNextPaint();
+        } else if (useTabStore.getState().tabs.length === 0) {
+          useTabStore.getState().addNewTab();
+        }
+
+        startupMark("session-load-start");
         const snapshot = await loadSession();
+        startupMeasure("session-load", "session-load-start");
         if (snapshot && snapshot.tabs.length > 0) {
-          await restoreSession(snapshot);
+          await restoreSession(snapshot, {
+            awaitActiveTabLoad: !restoredPreview,
+            reuseExistingTabIds: restoredPreview,
+          });
           toast.success(
             getT()("toast.sessionRestored", {
               count: String(snapshot.tabs.length),
             }),
           );
           syncFileWatchesNow();
-        } else if (useTabStore.getState().tabs.length === 0) {
+        } else if (!restoredPreview && useTabStore.getState().tabs.length === 0) {
           useTabStore.getState().addNewTab();
         }
       } catch (e) {
