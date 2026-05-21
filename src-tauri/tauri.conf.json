@@ -24,6 +24,57 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "fileAssociations": [
+      {
+        "ext": [
+          "txt",
+          "log",
+          "md",
+          "markdown",
+          "json",
+          "jsonc",
+          "js",
+          "jsx",
+          "ts",
+          "tsx",
+          "css",
+          "html",
+          "htm",
+          "xml",
+          "yaml",
+          "yml",
+          "toml",
+          "ini",
+          "cfg",
+          "conf",
+          "rs",
+          "py",
+          "java",
+          "c",
+          "cpp",
+          "h",
+          "hpp",
+          "cs",
+          "go",
+          "sh",
+          "bat",
+          "cmd",
+          "ps1",
+          "sql",
+          "csv",
+          "tsv"
+        ],
+        "name": "Runepad Text File",
+        "description": "Text file",
+        "mimeType": "text/plain",
+        "role": "Editor"
+      }
+    ],
+    "windows": {
+      "nsis": {
+        "installerHooks": "windows/nsis-installer-hooks.nsh"
+      }
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

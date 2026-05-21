@@ -9,7 +9,7 @@ use commands::session_ops::{
     clear_session, flush_session_cache, load_session, load_session_preview, save_session,
     SessionCache,
 };
-use commands::system_ops::get_system_theme;
+use commands::system_ops::{get_launch_files, get_system_theme};
 use commands::watch_ops::{sync_watched_dirs, unwatch_dir, WatchState};
 use commands::window_ops::{finish_window_close, WINDOW_CLOSING_EVENT};
 use menu::{
@@ -61,6 +61,7 @@ pub fn run() {
             write_file,
             read_dir,
             get_system_theme,
+            get_launch_files,
             save_session,
             load_session,
             load_session_preview,

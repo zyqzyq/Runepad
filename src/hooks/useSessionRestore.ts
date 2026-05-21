@@ -2,10 +2,13 @@ import { listen } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { getT, toastErrorMessage } from "@/i18n";
+import { getLaunchFiles } from "@/api/systemApi";
 import { loadSession, loadSessionPreview, saveSession } from "@/api/sessionApi";
 import { finishWindowClose } from "@/api/windowApi";
 import { syncFileWatchesNow } from "@/hooks/useDirWatcher";
 import { buildSessionSnapshot } from "@/lib/buildSessionSnapshot";
+import { disposeTabEditor } from "@/lib/editorInstances";
+import { openFileInTab } from "@/lib/openFileInTab";
 import { persistSessionSnapshot } from "@/lib/persistSession";
 import { restoreSession } from "@/lib/restoreSession";
 import { startupMark, startupMeasure } from "@/lib/startupPerf";
@@ -35,6 +38,32 @@ function isSessionPersistFresh(lastPersistedAt: number): boolean {
   return (
     lastPersistedAt > 0 && Date.now() - lastPersistedAt < SAVE_DEBOUNCE_MS
   );
+}
+
+async function openLaunchFiles(paths: string[]): Promise<void> {
+  const initialTabs = useTabStore.getState().tabs;
+  const replaceInitialTab =
+    initialTabs.length === 1 &&
+    initialTabs[0]?.isNew === true &&
+    initialTabs[0].filepath === null &&
+    !initialTabs[0].isDirty;
+  const initialTabId = replaceInitialTab ? initialTabs[0]?.id : null;
+  let openedAny = false;
+
+  for (const path of paths) {
+    try {
+      await openFileInTab(path);
+      openedAny = true;
+    } catch (e) {
+      toast.error(toastErrorMessage(e));
+    }
+  }
+
+  if (openedAny && initialTabId) {
+    disposeTabEditor(initialTabId);
+    useEditorStore.getState().removeMeta(initialTabId);
+    useTabStore.getState().closeTab(initialTabId);
+  }
 }
 
 export function useSessionRestore(): void {
@@ -93,6 +122,8 @@ export function useSessionRestore(): void {
     const run = async (): Promise<void> => {
       let restoredPreview = false;
       try {
+        const launchFiles = await getLaunchFiles();
+
         startupMark("session-preview-load-start");
         const preview = await loadSessionPreview();
         startupMeasure("session-preview-load", "session-preview-load-start");
@@ -124,6 +155,11 @@ export function useSessionRestore(): void {
           syncFileWatchesNow();
         } else if (!restoredPreview && useTabStore.getState().tabs.length === 0) {
           useTabStore.getState().addNewTab();
+        }
+
+        if (launchFiles.length > 0) {
+          await openLaunchFiles(launchFiles);
+          syncFileWatchesNow();
         }
       } catch (e) {
         toast.error(
