@@ -2,32 +2,35 @@ param(
   [string]$Architecture = "x64",
   [string]$Configuration = "release",
   [string]$Publisher = "CN=Runepad Dev",
-  [string]$CertificatePath = "src-tauri/windows/msix/certs/RunepadDev.pfx",
-  [string]$CertificatePassword = "runepad-dev",
+  [string]$CertificatePath = "src-tauri/windows/msix/certs/devcert.pfx",
   [switch]$SkipTauriBuild,
-  [switch]$SkipSigning
+  [switch]$SkipSigning,
+  [switch]$Store
 )
 
 $ErrorActionPreference = "Stop"
 
-function Find-WindowsKitTool {
-  param([string]$ToolName)
+function Invoke-Native {
+  param(
+    [string]$FilePath,
+    [string[]]$Arguments
+  )
 
-  $kitRoot = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
-  if (-not (Test-Path $kitRoot)) {
-    throw "Windows 10/11 SDK was not found. Install the Windows SDK to get $ToolName."
+  & $FilePath @Arguments
+  if ($LASTEXITCODE -ne 0) {
+    throw "$FilePath failed with exit code $LASTEXITCODE."
   }
+}
 
-  $tool = Get-ChildItem -Path $kitRoot -Recurse -Filter $ToolName -ErrorAction SilentlyContinue |
-    Where-Object { $_.FullName -like "*\$Architecture\*" } |
-    Sort-Object FullName -Descending |
-    Select-Object -First 1
+function Assert-Command {
+  param(
+    [string]$Name,
+    [string]$InstallHint
+  )
 
-  if (-not $tool) {
-    throw "$ToolName was not found in the Windows SDK for architecture $Architecture."
+  if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
+    throw "$Name was not found. $InstallHint"
   }
-
-  return $tool.FullName
 }
 
 function Copy-RequiredFile {
@@ -44,47 +47,66 @@ function Copy-RequiredFile {
   Copy-Item -Force -Path $Source -Destination $Destination
 }
 
-function Invoke-Native {
-  param(
-    [string]$FilePath,
-    [string[]]$Arguments
-  )
+function Find-WebView2OfflineInstaller {
+  param([string]$Arch)
 
-  & $FilePath @Arguments
-  if ($LASTEXITCODE -ne 0) {
-    throw "$FilePath failed with exit code $LASTEXITCODE."
+  $tauriCache = Join-Path $env:LOCALAPPDATA "tauri"
+  $archDir = if ($Arch -eq "x64") { "x64" } else { "x86" }
+  $searchPath = Join-Path $tauriCache $archDir
+
+  if (-not (Test-Path $searchPath)) {
+    return $null
   }
+
+  Get-ChildItem -Path $searchPath -Recurse -Filter "*WebView2*Installer*.exe" |
+    Select-Object -First 1
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "../..")
 $tauriDir = Join-Path $repoRoot "src-tauri"
 $msixDir = Join-Path $tauriDir "windows/msix"
-$stagingDir = Join-Path $tauriDir "target/msix/$Architecture"
-$packageDir = Join-Path $stagingDir "package"
 $outDir = Join-Path $tauriDir "target/msix"
+$workDir = Join-Path $outDir "$Architecture/winapp"
+$packageDir = Join-Path $workDir "package"
 $manifestTemplate = Join-Path $msixDir "Package.appxmanifest"
-$manifestPath = Join-Path $packageDir "AppxManifest.xml"
+$manifestPath = Join-Path $workDir "Package.appxmanifest"
 $appExe = Join-Path $tauriDir "target/$Configuration/runepad.exe"
 $shellExtDll = Join-Path $tauriDir "shell-ext/target/$Configuration/runepad_context_menu.dll"
-$unsignedMsix = Join-Path $outDir "Runepad-$Architecture.msix"
-$signedMsix = Join-Path $outDir "Runepad-$Architecture-signed.msix"
+$certPath = Join-Path $repoRoot $CertificatePath
+$workCert = Join-Path $workDir "devcert.pfx"
 $cargoBuildArgs = @("build", "--manifest-path", (Join-Path $tauriDir "shell-ext/Cargo.toml"))
+
 if ($Configuration -eq "release") {
   $cargoBuildArgs += "--release"
 } elseif ($Configuration -ne "debug") {
   throw "Unsupported configuration '$Configuration'. Use 'debug' or 'release'."
 }
 
+Assert-Command -Name "winapp" -InstallHint "Install it with: winget install microsoft.winappcli --source winget"
+
+if (-not $SkipSigning -and -not (Test-Path $certPath)) {
+  throw "Certificate not found: $certPath. Create one with: pnpm run msix:dev-cert"
+}
+
+if (-not $SkipSigning) {
+  $resolvedCert = Resolve-Path $certPath
+}
+
 Push-Location $repoRoot
 try {
   if (-not $SkipTauriBuild) {
-    Invoke-Native -FilePath "pnpm" -Arguments @("tauri", "build")
+    $tauriArgs = @("tauri", "build")
+    if ($Store) {
+      $tauriArgs += "--config", "src-tauri/tauri.microsoftstore.conf.json"
+      Write-Host "Building for Microsoft Store with offline WebView2 installer..."
+    }
+    Invoke-Native -FilePath "pnpm" -Arguments $tauriArgs
   }
 
   Invoke-Native -FilePath "cargo" -Arguments $cargoBuildArgs
 
-  if (Test-Path $packageDir) {
-    Remove-Item -Recurse -Force $packageDir
+  if (Test-Path $workDir) {
+    Remove-Item -Recurse -Force $workDir
   }
 
   New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
@@ -92,30 +114,57 @@ try {
 
   Copy-RequiredFile -Source $appExe -Destination (Join-Path $packageDir "Runepad.exe")
   Copy-RequiredFile -Source $shellExtDll -Destination (Join-Path $packageDir "runepad_context_menu.dll")
+  if (-not $SkipSigning) {
+    Copy-RequiredFile -Source $resolvedCert -Destination $workCert
+  }
+
   $assetDir = Join-Path $packageDir "Assets"
   Copy-RequiredFile -Source (Join-Path $tauriDir "icons/StoreLogo.png") -Destination (Join-Path $assetDir "StoreLogo.png")
   Copy-RequiredFile -Source (Join-Path $tauriDir "icons/Square44x44Logo.png") -Destination (Join-Path $assetDir "Square44x44Logo.png")
   Copy-RequiredFile -Source (Join-Path $tauriDir "icons/Square150x150Logo.png") -Destination (Join-Path $assetDir "Square150x150Logo.png")
   Copy-RequiredFile -Source (Join-Path $tauriDir "icons/icon.ico") -Destination (Join-Path $assetDir "icon.ico")
 
+  if ($Store) {
+    $webView2Installer = Find-WebView2OfflineInstaller -Arch $Architecture
+    if ($webView2Installer) {
+      Write-Host "Copying offline WebView2 installer: $($webView2Installer.FullName)"
+      Copy-RequiredFile -Source $webView2Installer.FullName -Destination (Join-Path $packageDir $webView2Installer.Name)
+    } else {
+      Write-Warning "Offline WebView2 installer not found. MSIX package may not work on systems without WebView2 installed."
+    }
+  }
+
   (Get-Content $manifestTemplate -Raw).
     Replace("__PUBLISHER__", $Publisher).
     Replace("__PROCESSOR_ARCHITECTURE__", $Architecture) |
     Set-Content -NoNewline -Encoding UTF8 $manifestPath
 
-  $makeAppx = Find-WindowsKitTool -ToolName "makeappx.exe"
-  Invoke-Native -FilePath $makeAppx -Arguments @("pack", "/d", $packageDir, "/p", $unsignedMsix, "/o")
+  Push-Location $workDir
+  try {
+    Remove-Item -Force -ErrorAction SilentlyContinue *.msix
+    $packArgs = @("pack", ".\package")
+    if (-not $SkipSigning) {
+      $packArgs += "--cert", ".\devcert.pfx"
+    }
+    Invoke-Native -FilePath "winapp" -Arguments $packArgs
+    $createdPackage = Get-ChildItem -Path $workDir -Filter "*.msix" |
+      Sort-Object LastWriteTime -Descending |
+      Select-Object -First 1
+    if (-not $createdPackage) {
+      throw "winapp pack completed but no .msix file was created in $workDir."
+    }
 
-  if ($SkipSigning) {
-    Write-Host "Created unsigned MSIX: $unsignedMsix"
-    return
+    $finalPackage = Join-Path $outDir $createdPackage.Name
+    Copy-Item -Force -Path $createdPackage.FullName -Destination $finalPackage
+    if ($SkipSigning) {
+      Write-Host "Created MSIX: $finalPackage"
+    } else {
+      Write-Host "Created signed MSIX: $finalPackage"
+    }
   }
-
-  $resolvedCert = Resolve-Path (Join-Path $repoRoot $CertificatePath)
-  $signTool = Find-WindowsKitTool -ToolName "signtool.exe"
-  Invoke-Native -FilePath $signTool -Arguments @("sign", "/fd", "SHA256", "/a", "/f", $resolvedCert, "/p", $CertificatePassword, $unsignedMsix)
-  Copy-Item -Force -Path $unsignedMsix -Destination $signedMsix
-  Write-Host "Created signed MSIX: $signedMsix"
+  finally {
+    Pop-Location
+  }
 }
 finally {
   Pop-Location
