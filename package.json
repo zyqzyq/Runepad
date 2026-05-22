@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "build:context-menu": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/build-context-menu.ps1",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri"
