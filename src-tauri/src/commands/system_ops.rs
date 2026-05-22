@@ -30,6 +30,7 @@ pub fn get_system_theme() -> Result<String, String> {
 pub fn get_launch_files() -> Result<Vec<String>, String> {
     let files = std::env::args_os()
         .skip(1)
+        .filter(|arg| arg != "--open-with-runepad")
         .filter_map(|arg| {
             let path = std::path::PathBuf::from(arg);
             let canonical = path.canonicalize().ok()?;

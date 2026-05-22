@@ -10,6 +10,10 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+target
+src-tauri/target
+src-tauri/shell-ext/target
+src-tauri/windows/msix/certs
 *.local
 
 # Editor directories and files

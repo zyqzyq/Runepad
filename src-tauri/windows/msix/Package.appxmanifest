@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap2="http://schemas.microsoft.com/appx/manifest/uap/windows10/2"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
+  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap uap2 uap3 desktop desktop4 desktop5 com rescap">
+  <Identity
+    Name="Runepad"
+    Publisher="__PUBLISHER__"
+    Version="0.4.1.0"
+    ProcessorArchitecture="__PROCESSOR_ARCHITECTURE__" />
+  <Properties>
+    <DisplayName>Runepad</DisplayName>
+    <PublisherDisplayName>Runepad</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22000.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+  <Resources>
+    <Resource Language="en-US" />
+  </Resources>
+  <Applications>
+    <Application Id="Runepad" Executable="Runepad.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Runepad"
+        Description="Lightweight desktop text editor"
+        BackgroundColor="transparent"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        Square150x150Logo="Assets\Square150x150Logo.png" />
+      <Extensions>
+        <uap3:Extension Category="windows.fileTypeAssociation">
+          <uap3:FileTypeAssociation Name="runepad-text" Parameters="&quot;%1&quot;">
+            <uap:DisplayName>Runepad Text File</uap:DisplayName>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.txt</uap:FileType>
+              <uap:FileType>.log</uap:FileType>
+              <uap:FileType>.md</uap:FileType>
+              <uap:FileType>.markdown</uap:FileType>
+              <uap:FileType>.json</uap:FileType>
+              <uap:FileType>.jsonc</uap:FileType>
+              <uap:FileType>.js</uap:FileType>
+              <uap:FileType>.jsx</uap:FileType>
+              <uap:FileType>.ts</uap:FileType>
+              <uap:FileType>.tsx</uap:FileType>
+              <uap:FileType>.css</uap:FileType>
+              <uap:FileType>.html</uap:FileType>
+              <uap:FileType>.htm</uap:FileType>
+              <uap:FileType>.xml</uap:FileType>
+              <uap:FileType>.yaml</uap:FileType>
+              <uap:FileType>.yml</uap:FileType>
+              <uap:FileType>.toml</uap:FileType>
+              <uap:FileType>.ini</uap:FileType>
+              <uap:FileType>.cfg</uap:FileType>
+              <uap:FileType>.conf</uap:FileType>
+              <uap:FileType>.rs</uap:FileType>
+              <uap:FileType>.py</uap:FileType>
+              <uap:FileType>.java</uap:FileType>
+              <uap:FileType>.c</uap:FileType>
+              <uap:FileType>.cpp</uap:FileType>
+              <uap:FileType>.h</uap:FileType>
+              <uap:FileType>.hpp</uap:FileType>
+              <uap:FileType>.cs</uap:FileType>
+              <uap:FileType>.go</uap:FileType>
+              <uap:FileType>.sh</uap:FileType>
+              <uap:FileType>.ps1</uap:FileType>
+              <uap:FileType>.sql</uap:FileType>
+              <uap:FileType>.csv</uap:FileType>
+              <uap:FileType>.tsv</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap2:SupportedVerbs>
+              <uap3:Verb Id="OpenWithRunepad" Parameters="--open-with-runepad &quot;%1&quot;">Open with Runepad</uap3:Verb>
+            </uap2:SupportedVerbs>
+          </uap3:FileTypeAssociation>
+        </uap3:Extension>
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:SurrogateServer DisplayName="Runepad Context Menu">
+              <com:Class Id="2CFA7747-B52C-4A23-94FB-4D7A847CFB6E" Path="runepad_context_menu.dll" ThreadingModel="STA" />
+            </com:SurrogateServer>
+          </com:ComServer>
+        </com:Extension>
+        <desktop4:Extension Category="windows.fileExplorerContextMenus">
+          <desktop4:FileExplorerContextMenus>
+            <desktop5:ItemType Type="*">
+              <desktop5:Verb Id="OpenWithRunepad" Clsid="2CFA7747-B52C-4A23-94FB-4D7A847CFB6E" />
+            </desktop5:ItemType>
+          </desktop4:FileExplorerContextMenus>
+        </desktop4:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>
