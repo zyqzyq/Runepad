@@ -9,6 +9,7 @@ use windows::Win32::Foundation::{
     CLASS_E_CLASSNOTAVAILABLE, CLASS_E_NOAGGREGATION, E_NOINTERFACE, E_NOTIMPL, HINSTANCE,
     HMODULE, S_OK,
 };
+use windows::Win32::Globalization::GetUserDefaultUILanguage;
 use windows::Win32::System::Com::{
     CoTaskMemAlloc, CoTaskMemFree, IBindCtx, IClassFactory, IClassFactory_Impl,
 };
@@ -20,7 +21,10 @@ use windows::Win32::UI::Shell::{
 
 const CLSID_RUNEPAD_CONTEXT_MENU: GUID =
     GUID::from_u128(0x2cfa7747_b52c_4a23_94fb_4d7a847cfb6e);
-const MENU_TITLE: &str = "Open with Runepad";
+const MENU_TITLE_EN: &str = "Open with Runepad";
+const MENU_TITLE_ZH: &str = "用 Runepad 打开";
+const MENU_TOOLTIP_EN: &str = "Open the selected file in Runepad";
+const MENU_TOOLTIP_ZH: &str = "在 Runepad 中打开所选文件";
 
 static DLL_MODULE: AtomicIsize = AtomicIsize::new(0);
 static SERVER_LOCKS: AtomicU32 = AtomicU32::new(0);
@@ -38,7 +42,7 @@ impl Drop for ExplorerCommand {
 #[allow(non_snake_case)]
 impl IExplorerCommand_Impl for ExplorerCommand_Impl {
     fn GetTitle(&self, _psiitemarray: Ref<'_, IShellItemArray>) -> Result<PWSTR> {
-        string_to_cotaskmem(MENU_TITLE)
+        string_to_cotaskmem(localized_text(MENU_TITLE_EN, MENU_TITLE_ZH))
     }
 
     fn GetIcon(&self, _psiitemarray: Ref<'_, IShellItemArray>) -> Result<PWSTR> {
@@ -49,7 +53,7 @@ impl IExplorerCommand_Impl for ExplorerCommand_Impl {
     }
 
     fn GetToolTip(&self, _psiitemarray: Ref<'_, IShellItemArray>) -> Result<PWSTR> {
-        string_to_cotaskmem("Open the selected file in Runepad")
+        string_to_cotaskmem(localized_text(MENU_TOOLTIP_EN, MENU_TOOLTIP_ZH))
     }
 
     fn GetCanonicalName(&self) -> Result<GUID> {
@@ -230,4 +234,15 @@ fn string_to_cotaskmem(value: &str) -> Result<PWSTR> {
         std::ptr::copy_nonoverlapping(wide.as_ptr(), ptr, wide.len());
     }
     Ok(PWSTR(ptr))
+}
+
+fn localized_text<'a>(english: &'a str, chinese: &'a str) -> &'a str {
+    const LANG_CHINESE: u16 = 0x04;
+    let language_id = unsafe { GetUserDefaultUILanguage() };
+    let primary_language_id = language_id & 0x03ff;
+    if primary_language_id == LANG_CHINESE {
+        chinese
+    } else {
+        english
+    }
 }
