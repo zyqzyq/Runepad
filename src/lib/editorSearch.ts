@@ -1,3 +1,5 @@
+// Runepad | Module: editorSearch | Depends on: @codemirror/search
+
 import {
   closeSearchPanel,
   openSearchPanel,

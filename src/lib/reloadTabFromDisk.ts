@@ -1,3 +1,5 @@
+// Runepad | Module: reloadTabFromDisk | Depends on: fileApi, editor helpers, stores
+
 import { readFile } from "@/api/fileApi";
 import { languageFromFilename } from "@/lib/languageFromFilename";
 import { setEditorContent } from "@/lib/setEditorContent";

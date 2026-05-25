@@ -1,3 +1,5 @@
+// Runepad | Module: codemirrorTheme | Depends on: @codemirror/view
+
 import type { Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import type { ResolvedTheme } from "@/stores/uiStore";

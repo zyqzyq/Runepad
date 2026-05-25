@@ -1,3 +1,5 @@
+// Runepad | Module: restoreSession | Depends on: dirApi, openFileInTab, stores
+
 import { readDir } from "@/api/dirApi";
 import { disposeTabEditor } from "@/lib/editorInstances";
 import { languageFromFilename } from "@/lib/languageFromFilename";

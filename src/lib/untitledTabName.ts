@@ -1,3 +1,5 @@
+// Runepad | Module: untitledTabName | Depends on: i18n
+
 import { getT } from "@/i18n";
 
 /** Display name for a new unsaved tab (1-based counter from tabStore). */

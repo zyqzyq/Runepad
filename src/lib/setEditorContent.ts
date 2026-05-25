@@ -1,3 +1,5 @@
+// Runepad | Module: setEditorContent | Depends on: @codemirror/state, editorInstances
+
 import { editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 

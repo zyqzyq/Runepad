@@ -1,3 +1,5 @@
+// Runepad | Module: collectWatchTargets | Depends on: normalizePath, stores
+
 import { normalizePath } from "@/lib/normalizePath";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useTabStore } from "@/stores/tabStore";

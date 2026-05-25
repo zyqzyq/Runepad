@@ -1,3 +1,5 @@
+// Runepad | Module: openFileInTab | Depends on: fileApi, stores, editor helpers
+
 import { readFile } from "@/api/fileApi";
 import { syncFileWatchesNow } from "@/hooks/useDirWatcher";
 import { basename, languageFromFilename } from "@/lib/languageFromFilename";

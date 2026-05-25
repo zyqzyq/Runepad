@@ -1,3 +1,5 @@
+// Runepad | Module: file_ops | Depends on: serde, utils::encoding, utils::path
+
 use serde::Serialize;
 
 use crate::utils::encoding::{decode_file_content, encode_file_content};

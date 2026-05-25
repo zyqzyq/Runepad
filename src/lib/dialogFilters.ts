@@ -1,3 +1,5 @@
+// Runepad | Module: dialogFilters | Depends on: i18n
+
 import { getT } from "@/i18n";
 
 export function getTextFileDialogFilters(): Array<{

@@ -1,3 +1,5 @@
+// Runepad | Module: persistSession | Depends on: sessionApi, buildSessionSnapshot
+
 import { saveSession } from "@/api/sessionApi";
 import { buildSessionSnapshot } from "@/lib/buildSessionSnapshot";
 

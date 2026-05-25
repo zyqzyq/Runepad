@@ -1,3 +1,5 @@
+// Runepad | Module: normalizePath | Depends on: none
+
 /** Normalize paths for comparison (Windows-friendly, strips extended-length prefix). */
 export function normalizePath(path: string): string {
   let p = path.trim();

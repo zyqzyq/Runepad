@@ -1,3 +1,5 @@
+// Runepad | Module: parentDir | Depends on: none
+
 /** Parent directory of a file or folder path (POSIX-style separators). */
 export function parentDir(filePath: string): string {
   const normalized = filePath.replace(/\\/g, "/").replace(/\/+$/, "");

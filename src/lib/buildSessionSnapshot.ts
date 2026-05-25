@@ -1,3 +1,5 @@
+// Runepad | Module: buildSessionSnapshot | Depends on: editorInstances, stores
+
 import { editorInstances } from "@/lib/editorInstances";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useTabStore } from "@/stores/tabStore";

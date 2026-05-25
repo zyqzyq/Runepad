@@ -1,3 +1,5 @@
+// Runepad | Module: languageFromFilename | Depends on: none
+
 export function languageFromFilename(filename: string): string {
   const dot = filename.lastIndexOf(".");
   if (dot < 0) return "plaintext";

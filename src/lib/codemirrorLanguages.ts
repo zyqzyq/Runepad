@@ -1,3 +1,5 @@
+// Runepad | Module: codemirrorLanguages | Depends on: @codemirror/language
+
 import type { Extension } from "@codemirror/state";
 
 export async function loadLanguageExtension(

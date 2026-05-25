@@ -1,3 +1,5 @@
+// Runepad | Module: commands | Depends on: command modules
+
 pub mod dir_ops;
 pub mod file_ops;
 pub mod menu_ops;

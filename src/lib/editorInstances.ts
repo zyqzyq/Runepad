@@ -1,3 +1,5 @@
+// Runepad | Module: editorInstances | Depends on: @codemirror/view, pendingDocs
+
 import type { EditorView } from "@codemirror/view";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 
