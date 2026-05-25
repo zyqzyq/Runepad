@@ -9,7 +9,7 @@ use commands::session_ops::{
     clear_session, flush_session_cache, load_session, load_session_preview, save_session,
     SessionCache,
 };
-use commands::system_ops::get_launch_files;
+use commands::system_ops::{get_launch_files, launch_files_from_args, OPEN_FILES_EVENT};
 use commands::watch_ops::{sync_watched_dirs, unwatch_dir, WatchState};
 use commands::window_ops::{finish_window_close, WINDOW_CLOSING_EVENT};
 use menu::{
@@ -17,11 +17,27 @@ use menu::{
     MENU_EDIT_REPLACE, MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE, MENU_FILE_CLOSE_FOLDER,
     MENU_FILE_NEW, MENU_FILE_OPEN, MENU_FILE_OPEN_FOLDER, MENU_FILE_RECENT, MENU_FILE_SAVE,
 };
+use std::ffi::OsString;
 use tauri::{Emitter, Manager, WindowEvent};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
+            let files = launch_files_from_args(
+                args.into_iter().map(OsString::from),
+                Some(std::path::Path::new(&cwd)),
+            );
+            if files.is_empty() {
+                return;
+            }
+
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+            let _ = app.emit(OPEN_FILES_EVENT, files);
+        }))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .manage(WatchState::default())

@@ -2,7 +2,7 @@ import { listen } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { getT, toastErrorMessage } from "@/i18n";
-import { getLaunchFiles } from "@/api/systemApi";
+import { getLaunchFiles, listenOpenFiles } from "@/api/systemApi";
 import { loadSession, loadSessionPreview, saveSession } from "@/api/sessionApi";
 import { finishWindowClose } from "@/api/windowApi";
 import { syncFileWatchesNow } from "@/hooks/useDirWatcher";
@@ -71,6 +71,7 @@ export function useSessionRestore(): void {
   const restoreDone = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPersistedAt = useRef(0);
+  const queuedOpenPaths = useRef<string[]>([]);
 
   const persistSession = async (): Promise<void> => {
     if (!restoreDone.current) return;
@@ -169,10 +170,41 @@ export function useSessionRestore(): void {
         );
       } finally {
         restoreDone.current = true;
+        if (queuedOpenPaths.current.length > 0) {
+          const paths = queuedOpenPaths.current;
+          queuedOpenPaths.current = [];
+          await openLaunchFiles(paths);
+          syncFileWatchesNow();
+        }
       }
     };
 
     void run();
+  }, []);
+
+  useEffect(() => {
+    let unlistenOpenFiles: (() => void) | undefined;
+    let active = true;
+
+    void listenOpenFiles((paths) => {
+      if (!restoreDone.current) {
+        queuedOpenPaths.current.push(...paths);
+        return;
+      }
+
+      void openLaunchFiles(paths).then(syncFileWatchesNow);
+    }).then((unlisten) => {
+      if (!active) {
+        unlisten();
+        return;
+      }
+      unlistenOpenFiles = unlisten;
+    });
+
+    return () => {
+      active = false;
+      unlistenOpenFiles?.();
+    };
   }, []);
 
   useEffect(() => {
