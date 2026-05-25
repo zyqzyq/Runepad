@@ -11,7 +11,7 @@ use commands::session_ops::{
 };
 use commands::system_ops::{get_launch_files, launch_files_from_args, OPEN_FILES_EVENT};
 use commands::watch_ops::{sync_watched_dirs, unwatch_dir, WatchState};
-use commands::window_ops::{finish_window_close, WINDOW_CLOSING_EVENT};
+use commands::window_ops::{finish_window_close, reveal_main_window, WINDOW_CLOSING_EVENT};
 use menu::{
     MENU_APP_ACTION_EVENT, MENU_APP_SETTINGS, MENU_EDIT_ACTION_EVENT, MENU_EDIT_FIND,
     MENU_EDIT_REPLACE, MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE, MENU_FILE_CLOSE_FOLDER,
@@ -33,8 +33,7 @@ pub fn run() {
             }
 
             if let Some(window) = app.get_webview_window("main") {
-                let _ = window.show();
-                let _ = window.set_focus();
+                reveal_main_window(&window);
             }
             let _ = app.emit(OPEN_FILES_EVENT, files);
         }))
