@@ -1,4 +1,5 @@
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { history } from "@codemirror/commands";
+import { indentUnit } from "@codemirror/language";
 import { search, searchKeymap } from "@codemirror/search";
 import { Compartment, EditorState, Prec, type Extension } from "@codemirror/state";
 import {
@@ -11,6 +12,7 @@ import {
 import { useEffect, useRef } from "react";
 import { getCodemirrorTheme, getEditorFontTheme } from "@/lib/codemirrorTheme";
 import { loadLanguageExtension } from "@/lib/codemirrorLanguages";
+import { editorKeymap } from "@/lib/editorKeymap";
 import { closeFindPanelIfOpen, toggleFindPanel } from "@/lib/editorSearch";
 import { destroyEditorInstance, editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
@@ -77,6 +79,8 @@ export function EditorPanel({
         highlightActiveLine(),
         history(),
         search({ top: true }),
+        indentUnit.of("    "),
+        EditorState.tabSize.of(4),
         Prec.highest(
           keymap.of([
             { key: "Mod-f", run: toggleFindPanel },
@@ -89,7 +93,7 @@ export function EditorPanel({
             },
           ]),
         ),
-        keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap]),
+        keymap.of([...editorKeymap, ...searchKeymap]),
         themeCompartment.of(
           getCodemirrorTheme(useUiStore.getState().resolvedTheme),
         ),
