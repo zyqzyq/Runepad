@@ -5,6 +5,7 @@ import {
   indentWithTab,
 } from "@codemirror/commands";
 import type { KeyBinding } from "@codemirror/view";
+import { openReplacePanel, toggleFindPanel } from "@/lib/editorSearch";
 
 type NativeEditCommand = "copy" | "cut" | "paste";
 
@@ -22,7 +23,19 @@ const nativeEditKeymap: readonly KeyBinding[] = [
   { key: "Mod-v", run: () => runNativeEditCommand("paste") },
 ];
 
+const searchKeymap: readonly KeyBinding[] = [
+  { key: "Mod-f", run: toggleFindPanel },
+  {
+    key: "Mod-h",
+    run: (view) => {
+      openReplacePanel(view);
+      return true;
+    },
+  },
+];
+
 export const editorKeymap: readonly KeyBinding[] = [
+  ...searchKeymap,
   ...nativeEditKeymap,
   indentWithTab,
   ...defaultKeymap,

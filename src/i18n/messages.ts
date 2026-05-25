@@ -3,6 +3,9 @@ import type { AppLocale } from "@/stores/settingsStore";
 export type MessageKey =
   | "settings.title"
   | "settings.close"
+  | "settings.apply"
+  | "settings.confirm"
+  | "settings.resetDefault"
   | "settings.tab.appearance"
   | "settings.tab.editor"
   | "settings.tab.language"
@@ -20,6 +23,22 @@ export type MessageKey =
   | "settings.locale.label"
   | "settings.locale.zh"
   | "settings.locale.en"
+  | "header.appName"
+  | "header.menu.file"
+  | "header.menu.edit"
+  | "header.newFile"
+  | "header.openFile"
+  | "header.saveFile"
+  | "header.closeTab"
+  | "header.recentFiles"
+  | "header.openFolder"
+  | "header.closeFolder"
+  | "header.find"
+  | "header.replace"
+  | "header.settings"
+  | "header.minimize"
+  | "header.maximize"
+  | "header.closeWindow"
   | "recent.title"
   | "recent.description.empty"
   | "recent.description.list"
@@ -38,6 +57,8 @@ export type MessageKey =
   | "tab.unsaved"
   | "tab.dragReorder"
   | "tab.close"
+  | "tab.scrollLeft"
+  | "tab.scrollRight"
   | "status.lineCol"
   | "status.words"
   | "explorer.emptyFolder"
@@ -54,6 +75,9 @@ export type MessageKey =
 const zhCN: Record<MessageKey, string> = {
   "settings.title": "设置",
   "settings.close": "关闭",
+  "settings.apply": "应用",
+  "settings.confirm": "确认",
+  "settings.resetDefault": "恢复默认",
   "settings.tab.appearance": "外观",
   "settings.tab.editor": "编辑器",
   "settings.tab.language": "语言",
@@ -71,6 +95,22 @@ const zhCN: Record<MessageKey, string> = {
   "settings.locale.label": "界面语言",
   "settings.locale.zh": "简体中文",
   "settings.locale.en": "English",
+  "header.appName": "Runepad",
+  "header.menu.file": "文件",
+  "header.menu.edit": "编辑",
+  "header.newFile": "新建",
+  "header.openFile": "打开文件",
+  "header.saveFile": "保存",
+  "header.closeTab": "关闭标签",
+  "header.recentFiles": "最近文件",
+  "header.openFolder": "打开文件夹",
+  "header.closeFolder": "关闭文件夹",
+  "header.find": "查找",
+  "header.replace": "替换",
+  "header.settings": "设置",
+  "header.minimize": "最小化",
+  "header.maximize": "最大化",
+  "header.closeWindow": "关闭窗口",
   "recent.title": "最近打开",
   "recent.description.empty": "暂无最近文件。打开或保存文件后会出现在这里。",
   "recent.description.list": "选择要打开的文件。",
@@ -89,6 +129,8 @@ const zhCN: Record<MessageKey, string> = {
   "tab.unsaved": "有未保存的更改",
   "tab.dragReorder": "拖动以重新排序 {filename}",
   "tab.close": "关闭 {filename}",
+  "tab.scrollLeft": "向左滚动标签",
+  "tab.scrollRight": "向右滚动标签",
   "status.lineCol": "行 {line}，列 {col}",
   "status.words": "{count} 字",
   "explorer.emptyFolder": "文件夹为空",
@@ -106,6 +148,9 @@ const zhCN: Record<MessageKey, string> = {
 const enUS: Record<MessageKey, string> = {
   "settings.title": "Settings",
   "settings.close": "Close",
+  "settings.apply": "Apply",
+  "settings.confirm": "OK",
+  "settings.resetDefault": "Restore defaults",
   "settings.tab.appearance": "Appearance",
   "settings.tab.editor": "Editor",
   "settings.tab.language": "Language",
@@ -123,6 +168,22 @@ const enUS: Record<MessageKey, string> = {
   "settings.locale.label": "Interface language",
   "settings.locale.zh": "简体中文",
   "settings.locale.en": "English",
+  "header.appName": "Runepad",
+  "header.menu.file": "File",
+  "header.menu.edit": "Edit",
+  "header.newFile": "New file",
+  "header.openFile": "Open file",
+  "header.saveFile": "Save",
+  "header.closeTab": "Close tab",
+  "header.recentFiles": "Recent files",
+  "header.openFolder": "Open folder",
+  "header.closeFolder": "Close folder",
+  "header.find": "Find",
+  "header.replace": "Replace",
+  "header.settings": "Settings",
+  "header.minimize": "Minimize",
+  "header.maximize": "Maximize",
+  "header.closeWindow": "Close window",
   "recent.title": "Recent files",
   "recent.description.empty":
     "No recent files yet. Open or save a file to add it here.",
@@ -143,6 +204,8 @@ const enUS: Record<MessageKey, string> = {
   "tab.unsaved": "Unsaved changes",
   "tab.dragReorder": "Drag to reorder {filename}",
   "tab.close": "Close {filename}",
+  "tab.scrollLeft": "Scroll tabs left",
+  "tab.scrollRight": "Scroll tabs right",
   "status.lineCol": "Ln {line}, Col {col}",
   "status.words": "{count} words",
   "explorer.emptyFolder": "Empty folder",

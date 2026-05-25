@@ -27,43 +27,43 @@ function defaultLocale(): AppLocale {
   return "en-US";
 }
 
-interface PersistedSettings {
+export interface PersistedSettings {
   editorFontFamily: string;
   editorFontSize: number;
   locale: AppLocale;
 }
 
-function loadSettings(): PersistedSettings {
-  const defaults: PersistedSettings = {
-    editorFontFamily: DEFAULT_EDITOR_FONT_FAMILY,
-    editorFontSize: 14,
-    locale: defaultLocale(),
-  };
+export const DEFAULT_SETTINGS: PersistedSettings = {
+  editorFontFamily: DEFAULT_EDITOR_FONT_FAMILY,
+  editorFontSize: 14,
+  locale: defaultLocale(),
+};
 
+function loadSettings(): PersistedSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaults;
+    if (!raw) return DEFAULT_SETTINGS;
     const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null) return defaults;
+    if (typeof parsed !== "object" || parsed === null) return DEFAULT_SETTINGS;
 
     const obj = parsed as Record<string, unknown>;
     const editorFontFamily =
       typeof obj.editorFontFamily === "string"
         ? obj.editorFontFamily
-        : defaults.editorFontFamily;
+        : DEFAULT_SETTINGS.editorFontFamily;
     const editorFontSize =
       typeof obj.editorFontSize === "number" &&
       EDITOR_FONT_SIZES.includes(obj.editorFontSize as (typeof EDITOR_FONT_SIZES)[number])
         ? obj.editorFontSize
-        : defaults.editorFontSize;
+        : DEFAULT_SETTINGS.editorFontSize;
     const locale =
       obj.locale === "zh-CN" || obj.locale === "en-US"
         ? obj.locale
-        : defaults.locale;
+        : DEFAULT_SETTINGS.locale;
 
     return { editorFontFamily, editorFontSize, locale };
   } catch {
-    return defaults;
+    return DEFAULT_SETTINGS;
   }
 }
 
@@ -76,6 +76,8 @@ function saveSettings(settings: PersistedSettings): void {
 }
 
 interface SettingsStore extends PersistedSettings {
+  applySettings: (settings: PersistedSettings) => void;
+  resetSettings: () => void;
   setEditorFontFamily: (family: string) => void;
   setEditorFontSize: (size: number) => void;
   setLocale: (locale: AppLocale) => void;
@@ -85,6 +87,16 @@ const initial = loadSettings();
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
   ...initial,
+
+  applySettings: (settings) => {
+    saveSettings(settings);
+    set(settings);
+  },
+
+  resetSettings: () => {
+    saveSettings(DEFAULT_SETTINGS);
+    set(DEFAULT_SETTINGS);
+  },
 
   setEditorFontFamily: (editorFontFamily) => {
     const next = { ...get(), editorFontFamily };

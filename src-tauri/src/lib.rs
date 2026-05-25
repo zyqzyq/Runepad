@@ -13,10 +13,9 @@ use commands::system_ops::{get_launch_files, get_system_theme};
 use commands::watch_ops::{sync_watched_dirs, unwatch_dir, WatchState};
 use commands::window_ops::{finish_window_close, WINDOW_CLOSING_EVENT};
 use menu::{
-    init_app_menu, MENU_APP_ACTION_EVENT, MENU_APP_SETTINGS, MENU_EDIT_ACTION_EVENT,
-    MENU_EDIT_FIND, MENU_EDIT_REPLACE, MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE,
-    MENU_FILE_CLOSE_FOLDER, MENU_FILE_NEW, MENU_FILE_OPEN, MENU_FILE_OPEN_FOLDER,
-    MENU_FILE_RECENT, MENU_FILE_SAVE,
+    MENU_APP_ACTION_EVENT, MENU_APP_SETTINGS, MENU_EDIT_ACTION_EVENT, MENU_EDIT_FIND,
+    MENU_EDIT_REPLACE, MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE, MENU_FILE_CLOSE_FOLDER,
+    MENU_FILE_NEW, MENU_FILE_OPEN, MENU_FILE_OPEN_FOLDER, MENU_FILE_RECENT, MENU_FILE_SAVE,
 };
 use tauri::{Emitter, Manager, WindowEvent};
 
@@ -27,10 +26,6 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(WatchState::default())
         .manage(SessionCache::default())
-        .setup(|app| {
-            init_app_menu(app)?;
-            Ok(())
-        })
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();

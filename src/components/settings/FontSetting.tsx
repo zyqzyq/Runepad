@@ -12,7 +12,6 @@ import {
   EDITOR_FONT_PRESETS,
   EDITOR_FONT_SIZES,
   fontPresetIdForFamily,
-  useSettingsStore,
 } from "@/stores/settingsStore";
 
 const PRESET_LABEL_KEYS: Record<string, MessageKey> = {
@@ -23,12 +22,20 @@ const PRESET_LABEL_KEYS: Record<string, MessageKey> = {
   fira: "settings.font.preset.fira",
 };
 
-export function FontSetting(): JSX.Element {
+interface FontSettingProps {
+  editorFontFamily: string;
+  editorFontSize: number;
+  onEditorFontFamilyChange: (family: string) => void;
+  onEditorFontSizeChange: (size: number) => void;
+}
+
+export function FontSetting({
+  editorFontFamily,
+  editorFontSize,
+  onEditorFontFamilyChange,
+  onEditorFontSizeChange,
+}: FontSettingProps): JSX.Element {
   const { t } = useI18n();
-  const editorFontFamily = useSettingsStore((s) => s.editorFontFamily);
-  const editorFontSize = useSettingsStore((s) => s.editorFontSize);
-  const setEditorFontFamily = useSettingsStore((s) => s.setEditorFontFamily);
-  const setEditorFontSize = useSettingsStore((s) => s.setEditorFontSize);
 
   const presetId = fontPresetIdForFamily(editorFontFamily);
 
@@ -40,7 +47,7 @@ export function FontSetting(): JSX.Element {
           value={presetId}
           onValueChange={(value) => {
             const preset = EDITOR_FONT_PRESETS.find((p) => p.id === value);
-            if (preset) setEditorFontFamily(preset.family);
+            if (preset) onEditorFontFamilyChange(preset.family);
           }}
         >
           <SelectTrigger id="font-family-select" className="w-full">
@@ -67,7 +74,7 @@ export function FontSetting(): JSX.Element {
           onValueChange={(value) => {
             const size = Number(value);
             if (EDITOR_FONT_SIZES.includes(size as (typeof EDITOR_FONT_SIZES)[number])) {
-              setEditorFontSize(size);
+              onEditorFontSizeChange(size);
             }
           }}
         >

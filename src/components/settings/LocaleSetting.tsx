@@ -7,14 +7,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useI18n } from "@/i18n";
-import { useSettingsStore, type AppLocale } from "@/stores/settingsStore";
+import type { AppLocale } from "@/stores/settingsStore";
 
 const LOCALE_OPTIONS: AppLocale[] = ["zh-CN", "en-US"];
 
-export function LocaleSetting(): JSX.Element {
+interface LocaleSettingProps {
+  value: AppLocale;
+  onChange: (value: AppLocale) => void;
+}
+
+export function LocaleSetting({
+  value,
+  onChange,
+}: LocaleSettingProps): JSX.Element {
   const { t } = useI18n();
-  const locale = useSettingsStore((s) => s.locale);
-  const setLocale = useSettingsStore((s) => s.setLocale);
 
   const localeLabel = (value: AppLocale): string =>
     value === "zh-CN" ? t("settings.locale.zh") : t("settings.locale.en");
@@ -23,15 +29,15 @@ export function LocaleSetting(): JSX.Element {
     <div className="flex flex-col gap-2">
       <Label htmlFor="locale-select">{t("settings.locale.label")}</Label>
       <Select
-        value={locale}
-        onValueChange={(value) => {
-          if (value === "zh-CN" || value === "en-US") {
-            setLocale(value);
+        value={value}
+        onValueChange={(nextValue) => {
+          if (nextValue === "zh-CN" || nextValue === "en-US") {
+            onChange(nextValue);
           }
         }}
       >
         <SelectTrigger id="locale-select" className="w-full">
-          <SelectValue>{localeLabel(locale)}</SelectValue>
+          <SelectValue>{localeLabel(value)}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {LOCALE_OPTIONS.map((opt) => (

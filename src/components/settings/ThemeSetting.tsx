@@ -8,14 +8,20 @@ import {
 } from "@/components/ui/select";
 import { useI18n } from "@/i18n";
 import type { MessageKey } from "@/i18n/messages";
-import { useUiStore, type ThemePreference } from "@/stores/uiStore";
+import type { ThemePreference } from "@/stores/uiStore";
 
 const THEME_OPTIONS: ThemePreference[] = ["light", "dark", "system"];
 
-export function ThemeSetting(): JSX.Element {
+interface ThemeSettingProps {
+  value: ThemePreference;
+  onChange: (value: ThemePreference) => void;
+}
+
+export function ThemeSetting({
+  value,
+  onChange,
+}: ThemeSettingProps): JSX.Element {
   const { t } = useI18n();
-  const theme = useUiStore((s) => s.theme);
-  const setTheme = useUiStore((s) => s.setTheme);
 
   const themeLabel = (value: ThemePreference): string => {
     const key: MessageKey =
@@ -31,19 +37,19 @@ export function ThemeSetting(): JSX.Element {
     <div className="flex flex-col gap-2">
       <Label htmlFor="theme-select">{t("settings.theme.label")}</Label>
       <Select
-        value={theme}
-        onValueChange={(value) => {
+        value={value}
+        onValueChange={(nextValue) => {
           if (
-            value === "light" ||
-            value === "dark" ||
-            value === "system"
+            nextValue === "light" ||
+            nextValue === "dark" ||
+            nextValue === "system"
           ) {
-            setTheme(value);
+            onChange(nextValue);
           }
         }}
       >
         <SelectTrigger id="theme-select" className="w-full">
-          <SelectValue>{themeLabel(theme)}</SelectValue>
+          <SelectValue>{themeLabel(value)}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {THEME_OPTIONS.map((opt) => (

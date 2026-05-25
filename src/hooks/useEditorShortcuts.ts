@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 import { useFileActions } from "@/hooks/useFileActions";
+import { editorInstances } from "@/lib/editorInstances";
+import { openReplacePanel, toggleFindPanel } from "@/lib/editorSearch";
+import { useTabStore } from "@/stores/tabStore";
 import { useUiStore } from "@/stores/uiStore";
 
 function isModKey(e: KeyboardEvent): boolean {
@@ -27,6 +30,18 @@ export function useEditorShortcuts(): void {
       } else if (key === "w") {
         e.preventDefault();
         closeActiveTab();
+      } else if (key === "f") {
+        const activeId = useTabStore.getState().activeId;
+        const view = activeId ? editorInstances.get(activeId) : undefined;
+        if (!view) return;
+        e.preventDefault();
+        toggleFindPanel(view);
+      } else if (key === "h") {
+        const activeId = useTabStore.getState().activeId;
+        const view = activeId ? editorInstances.get(activeId) : undefined;
+        if (!view) return;
+        e.preventDefault();
+        openReplacePanel(view);
       } else if (key === ",") {
         e.preventDefault();
         useUiStore.getState().setSettingsOpen(true);

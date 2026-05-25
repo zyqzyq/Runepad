@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import { EditorArea } from "@/components/editor/EditorArea";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { StatusBar } from "@/components/layout/StatusBar";
 import { TabBar } from "@/components/layout/TabBar";
@@ -51,17 +52,20 @@ export function AppLayout(): JSX.Element {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="flex h-screen w-screen flex-col overflow-hidden">
       <Suspense fallback={null}>
         {pendingTabId !== null && <CloseTabHost />}
         {recentFilesOpen && <RecentFilesHost />}
         {settingsOpen && <SettingsHost />}
       </Suspense>
-      {rootPath !== null && <Sidebar />}
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TabBar />
-        <EditorArea />
-        <StatusBar />
+      <AppHeader />
+      <div className="flex min-h-0 min-w-0 flex-1">
+        {rootPath !== null && <Sidebar />}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TabBar />
+          <EditorArea />
+          <StatusBar />
+        </div>
       </div>
     </div>
   );
