@@ -3,8 +3,8 @@
 This folder contains the MSIX manifest used by `pnpm run pack:msix`.
 
 The packaging scripts follow Microsoft's winapp CLI Tauri flow. The scripts
-generate a temporary loose layout under `src-tauri/target/msix/` because
-`winapp pack` reads `Package.appxmanifest` from the current directory.
+generate a temporary loose layout and manifest under `src-tauri/target/msix/`,
+then pass them to `winapp pack` with explicit paths.
 
 Useful commands:
 

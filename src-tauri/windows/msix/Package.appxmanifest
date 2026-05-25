@@ -12,7 +12,7 @@
   IgnorableNamespaces="uap uap2 uap3 desktop desktop4 desktop5 com rescap">
   <Identity
     Name="zyqzyq.Runepad"
-    Publisher="CN=54EF1116-0552-4D38-9B02-577DBBAAD07A"
+    Publisher="__PUBLISHER__"
     Version="0.5.0.0"
     ProcessorArchitecture="__PROCESSOR_ARCHITECTURE__" />
   <Properties>

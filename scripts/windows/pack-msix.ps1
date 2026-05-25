@@ -66,14 +66,13 @@ $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "../..")
 $tauriDir = Join-Path $repoRoot "src-tauri"
 $msixDir = Join-Path $tauriDir "windows/msix"
 $outDir = Join-Path $tauriDir "target/msix"
-$workDir = Join-Path $outDir "$Architecture/winapp"
-$packageDir = Join-Path $workDir "package"
+$archOutDir = Join-Path $outDir $Architecture
+$packageDir = Join-Path $archOutDir "package"
 $manifestTemplate = Join-Path $msixDir "Package.appxmanifest"
-$manifestPath = Join-Path $workDir "Package.appxmanifest"
+$manifestPath = Join-Path $archOutDir "Package.appxmanifest"
 $appExe = Join-Path $tauriDir "target/$Configuration/runepad.exe"
 $shellExtDll = Join-Path $tauriDir "shell-ext/target/$Configuration/runepad_context_menu.dll"
 $certPath = Join-Path $repoRoot $CertificatePath
-$workCert = Join-Path $workDir "devcert.pfx"
 $cargoBuildArgs = @("build", "--manifest-path", (Join-Path $tauriDir "shell-ext/Cargo.toml"))
 
 if ($Configuration -eq "release") {
@@ -105,18 +104,15 @@ try {
 
   Invoke-Native -FilePath "cargo" -Arguments $cargoBuildArgs
 
-  if (Test-Path $workDir) {
-    Remove-Item -Recurse -Force $workDir
+  if (Test-Path $packageDir) {
+    Remove-Item -Recurse -Force $packageDir
   }
 
   New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
-  New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+  New-Item -ItemType Directory -Force -Path $archOutDir | Out-Null
 
   Copy-RequiredFile -Source $appExe -Destination (Join-Path $packageDir "Runepad.exe")
   Copy-RequiredFile -Source $shellExtDll -Destination (Join-Path $packageDir "runepad_context_menu.dll")
-  if (-not $SkipSigning) {
-    Copy-RequiredFile -Source $resolvedCert -Destination $workCert
-  }
 
   $assetDir = Join-Path $packageDir "Assets"
   Copy-RequiredFile -Source (Join-Path $tauriDir "icons/StoreLogo.png") -Destination (Join-Path $assetDir "StoreLogo.png")
@@ -139,31 +135,16 @@ try {
     Replace("__PROCESSOR_ARCHITECTURE__", $Architecture) |
     Set-Content -NoNewline -Encoding UTF8 $manifestPath
 
-  Push-Location $workDir
-  try {
-    Remove-Item -Force -ErrorAction SilentlyContinue *.msix
-    $packArgs = @("pack", ".\package")
-    if (-not $SkipSigning) {
-      $packArgs += "--cert", ".\devcert.pfx"
-    }
-    Invoke-Native -FilePath "winapp" -Arguments $packArgs
-    $createdPackage = Get-ChildItem -Path $workDir -Filter "*.msix" |
-      Sort-Object LastWriteTime -Descending |
-      Select-Object -First 1
-    if (-not $createdPackage) {
-      throw "winapp pack completed but no .msix file was created in $workDir."
-    }
-
-    $finalPackage = Join-Path $outDir $createdPackage.Name
-    Copy-Item -Force -Path $createdPackage.FullName -Destination $finalPackage
-    if ($SkipSigning) {
-      Write-Host "Created MSIX: $finalPackage"
-    } else {
-      Write-Host "Created signed MSIX: $finalPackage"
-    }
+  $packArgs = @("pack", $packageDir, "--manifest", $manifestPath, "--output", $outDir)
+  if (-not $SkipSigning) {
+    $packArgs += "--cert", $resolvedCert
   }
-  finally {
-    Pop-Location
+  Invoke-Native -FilePath "winapp" -Arguments $packArgs
+
+  if ($SkipSigning) {
+    Write-Host "Created MSIX under: $outDir"
+  } else {
+    Write-Host "Created signed MSIX under: $outDir"
   }
 }
 finally {
