@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use crate::utils::path::validate_user_path;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DirEntry {
     pub name: String,
@@ -26,12 +26,10 @@ fn modified_at_unix(metadata: &std::fs::Metadata) -> u64 {
 }
 
 fn sort_entries(entries: &mut [DirEntry]) {
-    entries.sort_by(|a, b| {
-        match (a.is_directory, b.is_directory) {
-            (true, false) => std::cmp::Ordering::Less,
-            (false, true) => std::cmp::Ordering::Greater,
-            _ => a.name.to_lowercase().cmp(&b.name.to_lowercase()),
-        }
+    entries.sort_by(|a, b| match (a.is_directory, b.is_directory) {
+        (true, false) => std::cmp::Ordering::Less,
+        (false, true) => std::cmp::Ordering::Greater,
+        _ => a.name.to_lowercase().cmp(&b.name.to_lowercase()),
     });
 }
 
@@ -48,10 +46,7 @@ async fn read_dir_entries(dir: &PathBuf) -> Result<Vec<DirEntry>, String> {
             Err(_) => continue,
         };
 
-        let name = entry
-            .file_name()
-            .to_string_lossy()
-            .into_owned();
+        let name = entry.file_name().to_string_lossy().into_owned();
 
         let is_directory = metadata.is_dir();
         let is_file = metadata.is_file();
@@ -85,3 +80,7 @@ pub async fn read_dir(path: String) -> Result<Vec<DirEntry>, String> {
 
     read_dir_entries(&validated).await
 }
+
+#[cfg(test)]
+#[path = "tests/dir_ops_tests.rs"]
+mod tests;

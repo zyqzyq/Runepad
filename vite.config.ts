@@ -36,4 +36,11 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./tests/setup.ts"],
+    include: ["tests/unit/**/*.{test,spec}.{ts,tsx}"],
+    restoreMocks: true,
+  },
 }));

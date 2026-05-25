@@ -65,10 +65,13 @@ npx shadcn@latest add <component-name>
 | 类型 | 命令 / 方式 |
 |------|-------------|
 | TS 类型 | `pnpm tsc --noEmit` |
-| Rust | `cd src-tauri && cargo check && cargo clippy` |
+| 前端单测 | `pnpm test:run` |
+| 浏览器 E2E（mock Tauri IPC） | `pnpm e2e` |
+| Rust 单测 | `cd src-tauri && cargo test` |
+| Rust 检查 | `cd src-tauri && cargo check && cargo clippy` |
 | MSIX 脚本 | 需要传 PowerShell 参数时直接调用 `scripts/windows/pack-msix.ps1`；`pnpm run pack:msix` 走默认参数 |
-| 手动 P0 | 新建 → 编辑 → 保存 → 重开 → 脏关闭提示 |
+| 手动桌面验收 | 真实系统文件对话框、菜单、窗口按钮、MSIX/右键菜单、安装后图标 |
 | 图标更新 | `pnpm tauri icon <source>.png` → 确认 `src-tauri/icons/` 全更新 |
 | 右键菜单 | NSIS 安装后检查文件右键 `Open with Runepad`；MSIX 安装/升级后重启 `explorer.exe` |
 
-IPC 逻辑宜在 Rust `#[cfg(test)]` 中单测路径规范化。
+核心新建/编辑/脏关闭、打开去重、保存 IPC 参数、会话快照/恢复、目录监听目标、编码/换行读写应优先由自动化测试覆盖；人工只补真实桌面集成能力。

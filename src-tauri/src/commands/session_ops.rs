@@ -223,8 +223,8 @@ pub async fn load_session(app: AppHandle) -> Result<Option<SessionSnapshot>, Str
     let bytes = tokio::fs::read(&path)
         .await
         .map_err(|e| format!("Failed to read session: {e}"))?;
-    let session: SessionSnapshot = serde_json::from_slice(&bytes)
-        .map_err(|e| format!("Failed to parse session: {e}"))?;
+    let session: SessionSnapshot =
+        serde_json::from_slice(&bytes).map_err(|e| format!("Failed to parse session: {e}"))?;
     let _ = write_session_preview_to_disk(&app, &session).await;
     Ok(Some(session))
 }
@@ -238,8 +238,8 @@ pub async fn load_session_preview(app: AppHandle) -> Result<Option<SessionSnapsh
     let bytes = tokio::fs::read(&path)
         .await
         .map_err(|e| format!("Failed to read session: {e}"))?;
-    let session: SessionPreview = serde_json::from_slice(&bytes)
-        .map_err(|e| format!("Failed to parse session: {e}"))?;
+    let session: SessionPreview =
+        serde_json::from_slice(&bytes).map_err(|e| format!("Failed to parse session: {e}"))?;
     Ok(Some(session.into()))
 }
 
@@ -269,3 +269,7 @@ pub async fn clear_session(
     }
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "tests/session_ops_tests.rs"]
+mod tests;

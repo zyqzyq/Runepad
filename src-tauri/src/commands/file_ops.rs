@@ -9,7 +9,7 @@ use crate::utils::path::{
 
 const MAX_FILE_SIZE: u64 = 10 * 1024 * 1024;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReadFileResult {
     pub content: String,
@@ -59,3 +59,7 @@ pub async fn write_file(
 
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "tests/file_ops_tests.rs"]
+mod tests;
