@@ -51,8 +51,6 @@ pnpm tauri icon runepad-source.png
 npx shadcn@latest add <component-name>
 ```
 
-`package.json` 中 `build:context-menu` 目前引用旧脚本，仓库内已无该脚本；右键菜单以 NSIS hook 与 MSIX shell extension 路径为准。
-
 ## 应用图标与 Windows 缓存
 
 `pnpm tauri icon <source>.png` 会更新 `src-tauri/icons/` 下各尺寸资源。

@@ -7,7 +7,7 @@ export {
 } from "./fileApi";
 export type { ReadFileResponse } from "./fileApi";
 export { readDir } from "./dirApi";
-export { getSystemTheme } from "./systemApi";
+export { getLaunchFiles } from "./systemApi";
 export {
   saveSession,
   loadSession,

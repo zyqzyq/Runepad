@@ -1,7 +1,7 @@
 ## AI 开发指导手册 (AGENTS.md)
 
 > 本文件是项目的「宪法」，Cursor 每次对话会注入全文。详细参考见 [`docs/`](docs/)；人类上手见 [`README.md`](README.md)。
-> 版本: 0.5.1 | 最后更新: 2026-05-25
+> 版本: 0.5.2 | 最后更新: 2026-05-25
 
 ### 文档索引（按需阅读）
 
@@ -148,6 +148,8 @@
 
 **错误**：IPC 必须 try/catch；Rust 友好 `Result` 字符串；路径失败 `"Invalid path: access denied"`；保存成功 `toast.success`。详见 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) 验收表。
 
+**系统主题**：禁止通过 Rust IPC 调用 `reg.exe` 读取 Windows 主题；启动路径使用 `window.matchMedia("(prefers-color-scheme: dark)")`，避免 release 启动性能回退。
+
 ---
 
 ## 已知技术债
@@ -155,8 +157,7 @@
 1. Windows 构建后 `.exe` 图标可能仍旧（见 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)）
 2. Sonner 仍用 `next-themes`；应用主题由 `uiStore` 管理
 3. 目录监听仅前端防抖（`useDirWatcher`）
-4. `package.json` 中 `build:context-menu` 仍引用已不存在的旧脚本；当前右键菜单随 NSIS/MSIX 打包路径处理
-5. >10MB 直接拒绝；Command Palette 未做（P3+）
+4. >10MB 直接拒绝；Command Palette 未做（P3+）
 
 ---
 

@@ -23,6 +23,7 @@
 ## Important Constraints
 
 - Do not call Rust IPC for system theme during startup. Use `window.matchMedia("(prefers-color-scheme: dark)")`; spawning `reg.exe` on Windows caused release startup to stall for about 6 seconds.
+- Do not reintroduce `get_system_theme` or any other `reg.exe`-based theme lookup. System theme belongs in the WebView via `matchMedia`, including startup and later theme-change handling.
 - Do not add synchronous startup logging on the IPC hot path. Temporary `startup.log` diagnostics helped locate the issue, but file writes and extra invokes can distort startup measurements.
 - Keep `session.preview.json` small and free of document `content`. Full text belongs only in `session.json` when needed for dirty/new tabs.
 - Avoid moving CodeMirror into the main startup bundle unless there is a measured reason; it increases the amount of JS parsed before the app shell can settle.

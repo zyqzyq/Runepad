@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:context-menu": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/build-context-menu.ps1",
     "pack:msix": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/pack-msix.ps1",
     "pack:msix:store": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/pack-msix.ps1 -Store -SkipSigning",
     "msix:dev-cert": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows/create-msix-dev-cert.ps1",

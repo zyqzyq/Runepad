@@ -113,7 +113,6 @@ Tauri Builder 的事实入口：
 
 ## 阅读时的坑
 
-- `get_system_theme` 仍存在，但启动路径不要调用它；Windows `reg.exe` 曾造成 release 启动卡顿。
+- `get_system_theme` 已移除；不要通过 Rust IPC 或 `reg.exe` 读取 Windows 主题，统一用 WebView `matchMedia`。
 - `session.preview.json` 不含正文，完整正文只在 `session.json` 中按需保存。
 - 脏文件遇到磁盘变化只提示，不自动覆盖用户编辑。
-- `package.json` 的 `build:context-menu` 是旧脚本入口，目前脚本文件不存在。

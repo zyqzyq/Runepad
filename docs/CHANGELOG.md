@@ -4,6 +4,7 @@
 
 | 版本 | 日期 | 主要变更 |
 |------|------|----------|
+| 0.5.2 | 2026-05-25 | 移除无效 `build:context-menu` 脚本；移除 `get_system_theme` IPC 与前端导出；记录禁止通过 `reg.exe` 读取系统主题，统一使用 WebView `matchMedia`。 |
 | 0.5.1 | 2026-05-25 | 同步 `AGENTS.md` 当前进度；记录 Codex 沙箱中 pnpm shim 需授权执行；补充启动/平台打包/右键菜单文档；新增人类代码导览 `docs/CODE_READING.md`（AI 默认不读）。 |
 | 0.5.0 | 2026-05-22 | 支持右键菜单快捷打开 Runepad 窗口 |
 | 0.4.1 | 2026-05-21 | Added `docs/STARTUP.md`; documented release startup optimization, two-stage session restore with `session.preview.json`, lazy editor/dialog loading, and the Windows `reg.exe` theme lookup pitfall. |
