@@ -4,6 +4,7 @@
 
 | 版本 | 日期 | 主要变更 |
 |------|------|----------|
+| 0.5.1 | 2026-05-25 | 同步 `AGENTS.md` 当前进度；记录 Codex 沙箱中 pnpm shim 需授权执行；补充启动/平台打包/右键菜单文档；新增人类代码导览 `docs/CODE_READING.md`（AI 默认不读）。 |
 | 0.5.0 | 2026-05-22 | 支持右键菜单快捷打开 Runepad 窗口 |
 | 0.4.1 | 2026-05-21 | Added `docs/STARTUP.md`; documented release startup optimization, two-stage session restore with `session.preview.json`, lazy editor/dialog loading, and the Windows `reg.exe` theme lookup pitfall. |
 | 0.4.0 | 2026-05-20 | 文档拆分：`AGENTS.md` 瘦身为 AI 硬规则入口；详情迁至 `docs/`（DEVELOPMENT、ARCHITECTURE、STACK、ROADMAP、UI、CHANGELOG）；契约以 `src/api` / `src/types` 为准 |

@@ -13,6 +13,8 @@ runepad/                         # 项目根（包名 runepad）
 │   ├── STACK.md
 │   ├── ROADMAP.md
 │   ├── UI.md
+│   ├── STARTUP.md
+│   ├── CODE_READING.md           # 人类代码导览；AI 默认不读
 │   └── CHANGELOG.md
 ├── src/
 │   ├── components/
@@ -57,8 +59,11 @@ runepad/                         # 项目根（包名 runepad）
 │   │   ├── menu.rs              # 原生菜单定义
 │   │   ├── commands/            # IPC 命令（file_ops, dir_ops, watch_ops, session_ops, system_ops, menu_ops, window_ops）
 │   │   └── utils/               # Rust 工具（encoding, path）
+│   ├── shell-ext/                # Windows 11 MSIX ExplorerCommand 右键菜单 DLL
+│   ├── windows/                  # NSIS hooks、MSIX manifest、开发证书
 │   ├── Cargo.toml
 │   └── tauri.conf.json
+├── scripts/windows/              # MSIX 打包与开发证书脚本
 ├── public/
 ├── index.html
 ├── vite.config.ts
@@ -98,3 +103,18 @@ stores/closeTabStore.ts    # 关闭标签时的确认弹窗状态（待关闭 id
 - 主题：App 与 CM 主题分离，切换时同一入口
 - 快捷键：P0–P2 硬编码；后续可 JSON 覆盖
 - 插件系统：**不**在 v1 创建空目录；接口稳定后再议
+
+## 启动与会话链路
+
+- `tabStore` 初始化一个轻量未命名 Tab，保证首屏无需等待会话 IO。
+- `main.tsx` 首帧后预取 `EditorPanel`，CodeMirror 不进入首屏关键路径。
+- `useSessionRestore` 先读 `session.preview.json` 恢复标签元数据、活动 Tab、目录树与主题，再读完整 `session.json` 恢复未保存内容。
+- `persistSessionSnapshot` 写入完整会话，Rust 同步生成不含正文的 preview 文件。
+- `WindowEvent::CloseRequested` 由 Rust 拦截并发 `runepad://window-closing`，前端 flush 会话后调用 `finish_window_close`。
+
+## Windows 平台集成
+
+- NSIS 右键菜单：`src-tauri/windows/nsis-installer-hooks.nsh` 注册 HKCU `Software\Classes\*\shell\Runepad`。
+- MSIX 右键菜单：`src-tauri/shell-ext` 构建 `runepad_context_menu.dll`，`src-tauri/windows/msix/Package.appxmanifest` 声明 ExplorerCommand。
+- 文件关联：`src-tauri/tauri.conf.json` 的 `bundle.fileAssociations` 是扩展名清单来源。
+- 启动文件：`src-tauri/src/commands/system_ops.rs#get_launch_files` 过滤 `--open-with-runepad` 后返回真实文件路径。

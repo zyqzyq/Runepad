@@ -12,6 +12,14 @@
 - The explorer root and active tab content are prioritized after preview restore so the visible tree and active editor content appear before lower-priority session work.
 - Settings/recent-files/dirty-close hosts are lazy-loaded and only mounted when opened.
 
+## Current Code Paths
+
+- `src/main.tsx`: marks startup timings, renders React, prefetches `EditorPanel` after the first frame.
+- `src/components/layout/AppLayout.tsx`: mounts global startup hooks and lazy dialog hosts.
+- `src/hooks/useSessionRestore.ts`: orchestrates preview restore, full restore, launch-file handling, debounced saves, and close-time flush.
+- `src/lib/persistSession.ts` and `src/lib/buildSessionSnapshot.ts`: collect and persist session state without storing full document content in Zustand.
+- `src-tauri/src/commands/session_ops.rs`: writes `session.json` and compact `session.preview.json`.
+
 ## Important Constraints
 
 - Do not call Rust IPC for system theme during startup. Use `window.matchMedia("(prefers-color-scheme: dark)")`; spawning `reg.exe` on Windows caused release startup to stall for about 6 seconds.

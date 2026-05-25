@@ -1,7 +1,7 @@
 ## AI 开发指导手册 (AGENTS.md)
 
 > 本文件是项目的「宪法」，Cursor 每次对话会注入全文。详细参考见 [`docs/`](docs/)；人类上手见 [`README.md`](README.md)。
-> 版本: 0.4.0 | 最后更新: 2026-05-20
+> 版本: 0.5.1 | 最后更新: 2026-05-25
 
 ### 文档索引（按需阅读）
 
@@ -12,7 +12,9 @@
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | 目录树、Store 划分、扩展预留 |
 | [`docs/UI.md`](docs/UI.md) | 布局、主题、菜单、快捷键 |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | 安装、构建、类型检查、验收命令 |
+| [`docs/STARTUP.md`](docs/STARTUP.md) | 启动性能、会话预览恢复、首屏约束 |
 | [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | 文档版本历史 |
+| [`docs/CODE_READING.md`](docs/CODE_READING.md) | 给人类读代码的导览；**AI 默认不读**，除非用户明确要求 |
 
 **契约单一事实来源**：`src/api/*.ts`、`src/types/*.ts`、`src/stores/*.ts` — 不假设接口存在；修改契约时同步 Rust 与 capabilities。
 
@@ -35,11 +37,11 @@
 | 项 | 值 |
 |----|-----|
 | **项目** | Runepad — 轻量级桌面文本编辑器（Notepad++ 现代替代品） |
-| **阶段** | P0/P1 完成；P2 基本完成；P3+ 部分（会话恢复、目录监听已落地） |
+| **阶段** | P0/P1/P2 完成；P3+ 部分（会话恢复、目录监听已落地） |
 | **前端** | React 18 + Vite 6 + Tailwind v4 + shadcn/ui v4 (Base UI) + CodeMirror 6 |
 | **后端** | Tauri v2 + Rust + tokio + notify + encoding_rs |
 | **状态** | Zustand v5（tab/editor/ui/settings/explorer/recent/closeTab） |
-| **构建** | `pnpm tauri dev` / `pnpm tauri build` |
+| **构建** | `pnpm tauri dev` / `pnpm tauri build` / `pnpm run pack:msix` |
 
 ---
 
@@ -49,7 +51,7 @@
 |------|------|------|
 | P0 可编辑可存盘 | 完成 | 菜单、Tab、StatusBar、主题 |
 | P1 像编辑器 | 完成 | 文件树、脏关闭、语法高亮 |
-| P2 效率 | 基本完成 | 查找替换、最近文件、拖拽、GBK |
+| P2 效率 | 完成 | 查找替换、最近文件、拖拽排序、GBK/UTF-8 读写 |
 | P3+ 进阶 | 部分 | 会话恢复、watch 已做；>10MB 分片、Command Palette 未做 |
 
 **禁止**跨阶段一次性实现未列入当前阶段的特性。v1 不做：N++ 插件、宏、FTP、打印、内置浏览器、分屏。
@@ -119,6 +121,13 @@
 5. 单一职责；**禁止** `export *`
 6. 交付时简短说明改了什么、为何改；**禁止**擅自扩大范围或静默删逻辑
 
+### Codex / pnpm 运行说明（Windows）
+
+- 本机 pnpm shim 路径：`C:\Users\zhang\AppData\Local\pnpm\bin\pnpm.CMD`
+- Codex 沙箱内可能已含该 PATH，但直接执行用户目录下的 `pnpm.CMD` 会报“拒绝访问”。
+- 遇到 `pnpm` 不可识别或 `pnpm.CMD` 拒绝访问时，优先用同一路径请求沙箱外执行授权；不要误判为项目缺依赖。
+- 已确认沙箱外 `pnpm --version` 为 `11.1.2`。
+
 **契约变更**时回复开头标明：
 
 ```markdown
@@ -146,7 +155,8 @@
 1. Windows 构建后 `.exe` 图标可能仍旧（见 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)）
 2. Sonner 仍用 `next-themes`；应用主题由 `uiStore` 管理
 3. 目录监听仅前端防抖（`useDirWatcher`）
-4. >10MB 直接拒绝；Command Palette 未做（P3+）
+4. `package.json` 中 `build:context-menu` 仍引用已不存在的旧脚本；当前右键菜单随 NSIS/MSIX 打包路径处理
+5. >10MB 直接拒绝；Command Palette 未做（P3+）
 
 ---
 

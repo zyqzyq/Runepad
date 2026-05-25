@@ -26,6 +26,8 @@
 - 国际化（i18n，zh-CN / en-US）
 - 设置面板（字体、字号、语言、主题）
 - 自定义应用图标（已替换 Tauri 默认图标）
+- Windows 文件关联与右键菜单（NSIS 安装器注册基础动词；MSIX 路径含 shell extension）
+- 启动性能优化（轻量首屏、EditorPanel 延迟加载、两阶段会话恢复）
 
 ## 开发阶段与范围
 
@@ -35,8 +37,15 @@
 |------|------|------|------|
 | **P0** | 可编辑、可存盘 | 布局骨架、CodeMirror 编辑器、Tab、**Tauri 原生菜单**（文件/编辑）、`Ctrl+O/S/N/W`、StatusBar（行列/编码/换行/字数）、Light/Dark/System 主题 | 已完成 |
 | **P1** | 像编辑器 | Sidebar 文件树、`readDir`、脏标签关闭确认、按扩展名语法高亮、错误 toast | 已完成 |
-| **P2** | 效率 | 查找/替换、最近文件、Tab 拖拽排序、GBK 等非 UTF-8 读写（Windows 常见） | 部分完成（查找替换、最近文件、拖拽排序、GBK 编码已支持） |
+| **P2** | 效率 | 查找/替换、最近文件、Tab 拖拽排序、GBK 等非 UTF-8 读写（Windows 常见） | 已完成 |
 | **P3+** | 进阶 | 会话恢复、目录 `watch`（须防抖）、>10MB 分片/只读、Command Palette | 部分完成（会话恢复、目录监听已落地；分片/只读、Command Palette 未做） |
+
+## 打包与平台集成进度
+
+- NSIS：`src-tauri/windows/nsis-installer-hooks.nsh` 在安装后写入 HKCU 右键菜单 `Open with Runepad`，卸载时清理。
+- MSIX：`scripts/windows/pack-msix.ps1` 负责 Tauri 构建、shell extension 构建、资源复制与 `winapp pack`；Store 构建使用 `pnpm run pack:msix:store`。
+- 文件关联：`tauri.conf.json` 已声明常见文本/代码扩展名，应用角色为 `Editor`。
+- 启动入参：`get_launch_files` 支持从文件关联或右键菜单传入路径并打开到 Tab。
 
 ## v1 明确不做（Out of Scope）
 

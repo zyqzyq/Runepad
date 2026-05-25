@@ -99,3 +99,10 @@
 | `encoding_rs` | GBK/UTF-8 编码检测与转换 |
 | `tokio` | 异步 IO |
 | `serde`, `serde_json` | 序列化 |
+| `windows`, `windows-core`（shell-ext 子 crate） | Windows 11 ExplorerCommand 右键菜单 COM DLL |
+
+## 平台打包工具
+
+- NSIS：由 Tauri bundle 使用，安装/卸载 hook 见 `src-tauri/windows/nsis-installer-hooks.nsh`。
+- MSIX：`scripts/windows/pack-msix.ps1` 使用 Microsoft `winapp` CLI 打包；本地签名证书由 `scripts/windows/create-msix-dev-cert.ps1` 生成。
+- shell extension：`src-tauri/shell-ext` 是独立 Rust crate，仅用于 Windows MSIX 右键菜单，不属于主 Tauri IPC 进程。
