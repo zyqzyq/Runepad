@@ -24,6 +24,7 @@ function parseLineEnding(value: string): LineEnding {
 }
 
 function sessionTabToTab(st: SessionTab, existingId?: string): Tab {
+  const filenameLanguage = languageFromFilename(st.filename);
   return {
     id: existingId ?? crypto.randomUUID(),
     filename: st.filename,
@@ -32,7 +33,10 @@ function sessionTabToTab(st: SessionTab, existingId?: string): Tab {
     isDirty: st.isDirty,
     encoding: st.encoding,
     lineEnding: parseLineEnding(String(st.lineEnding)),
-    language: st.language || languageFromFilename(st.filename),
+    language:
+      st.language && st.language !== "plaintext"
+        ? st.language
+        : filenameLanguage,
   };
 }
 

@@ -14,6 +14,9 @@ export function languageFromFilename(filename: string): string {
     case "md":
     case "markdown":
       return "markdown";
+    case "yaml":
+    case "yml":
+      return "yaml";
     default:
       return "plaintext";
   }

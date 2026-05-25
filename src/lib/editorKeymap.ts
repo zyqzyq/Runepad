@@ -3,6 +3,7 @@ import {
   defaultKeymap,
   historyKeymap,
   indentWithTab,
+  toggleComment,
 } from "@codemirror/commands";
 import type { KeyBinding } from "@codemirror/view";
 import { openReplacePanel, toggleFindPanel } from "@/lib/editorSearch";
@@ -34,8 +35,13 @@ const searchKeymap: readonly KeyBinding[] = [
   },
 ];
 
+const commentKeymap: readonly KeyBinding[] = [
+  { key: "Mod-/", run: toggleComment },
+];
+
 export const editorKeymap: readonly KeyBinding[] = [
   ...searchKeymap,
+  ...commentKeymap,
   ...nativeEditKeymap,
   indentWithTab,
   ...defaultKeymap,
