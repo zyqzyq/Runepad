@@ -18,6 +18,8 @@ pnpm run pack:msix
 Install notes:
 
 - `winapp cert generate` reads the Publisher from the generated manifest, so keep the script `-Publisher` value aligned with `Package.appxmanifest`.
+- `-Publisher` has the highest priority. When it is omitted, the scripts read `RUNEPAD_MSIX_PUBLISHER`, `MSIX_PUBLISHER`, `PUBLISHER`, or `Publisher` from the repository `.env` file, then fall back to `CN=Runepad Dev`.
+- `pnpm run msix:dev-cert` replaces the local ignored `devcert.pfx` so Publisher changes in `.env` do not leave an old certificate behind.
 - `winapp cert install` must be run once for local self-signed packages.
 - `Package.appxmanifest` uses `windows.fileTypeAssociation` for the low-cost context menu verb and `windows.fileExplorerContextMenus` for the Windows 11 primary context menu.
 - Restart `explorer.exe` after installing or upgrading the MSIX so File Explorer reloads the shell extension.

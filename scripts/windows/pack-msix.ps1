@@ -1,7 +1,7 @@
 param(
   [string]$Architecture = "x64",
   [string]$Configuration = "release",
-  [string]$Publisher = "CN=Runepad Dev",
+  [string]$Publisher,
   [string]$CertificatePath = "src-tauri/windows/msix/certs/devcert.pfx",
   [switch]$SkipTauriBuild,
   [switch]$SkipSigning,
@@ -47,6 +47,42 @@ function Copy-RequiredFile {
   Copy-Item -Force -Path $Source -Destination $Destination
 }
 
+function Get-DotEnvValue {
+  param(
+    [string]$Path,
+    [string]$Name
+  )
+
+  if (-not (Test-Path $Path)) {
+    return $null
+  }
+
+  $prefix = "$Name="
+  $exportPrefix = "export $Name="
+  foreach ($line in Get-Content -Path $Path) {
+    $trimmed = $line.Trim()
+    if ($trimmed.Length -eq 0 -or $trimmed.StartsWith("#")) {
+      continue
+    }
+
+    if ($trimmed.StartsWith($exportPrefix)) {
+      $value = $trimmed.Substring($exportPrefix.Length).Trim()
+    } elseif ($trimmed.StartsWith($prefix)) {
+      $value = $trimmed.Substring($prefix.Length).Trim()
+    } else {
+      continue
+    }
+
+    if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+      $value = $value.Substring(1, $value.Length - 2)
+    }
+
+    return $value
+  }
+
+  return $null
+}
+
 function Find-WebView2OfflineInstaller {
   param([string]$Arch)
 
@@ -74,6 +110,23 @@ $appExe = Join-Path $tauriDir "target/$Configuration/runepad.exe"
 $shellExtDll = Join-Path $tauriDir "shell-ext/target/$Configuration/runepad_context_menu.dll"
 $certPath = Join-Path $repoRoot $CertificatePath
 $cargoBuildArgs = @("build", "--manifest-path", (Join-Path $tauriDir "shell-ext/Cargo.toml"))
+$envPath = Join-Path $repoRoot ".env"
+
+if (-not $PSBoundParameters.ContainsKey("Publisher") -or [string]::IsNullOrWhiteSpace($Publisher)) {
+  $Publisher = Get-DotEnvValue -Path $envPath -Name "RUNEPAD_MSIX_PUBLISHER"
+  if ([string]::IsNullOrWhiteSpace($Publisher)) {
+    $Publisher = Get-DotEnvValue -Path $envPath -Name "MSIX_PUBLISHER"
+  }
+  if ([string]::IsNullOrWhiteSpace($Publisher)) {
+    $Publisher = Get-DotEnvValue -Path $envPath -Name "PUBLISHER"
+  }
+  if ([string]::IsNullOrWhiteSpace($Publisher)) {
+    $Publisher = Get-DotEnvValue -Path $envPath -Name "Publisher"
+  }
+  if ([string]::IsNullOrWhiteSpace($Publisher)) {
+    $Publisher = "CN=Runepad Dev"
+  }
+}
 
 if ($Configuration -eq "release") {
   $cargoBuildArgs += "--release"
