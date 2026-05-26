@@ -11,6 +11,14 @@ export interface SessionTab {
   isDirty: boolean;
 }
 
+export interface SessionWindowState {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  maximized: boolean;
+}
+
 export interface SessionSnapshot {
   version: number;
   activeIndex: number;
@@ -18,4 +26,7 @@ export interface SessionSnapshot {
   explorerRoot: string | null;
   expandedPaths: string[];
   theme: string | null;
+  sidebarCollapsed?: boolean;
+  sidebarWidth?: number | null;
+  windowState?: SessionWindowState | null;
 }

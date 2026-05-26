@@ -31,6 +31,7 @@ export function resetStores(tabs: Tab[] = [makeTab({ id: "tab-1" })]): void {
       theme: "system",
       resolvedTheme: "light",
       sidebarCollapsed: false,
+      sidebarWidth: 250,
       recentFilesOpen: false,
       settingsOpen: false,
     },

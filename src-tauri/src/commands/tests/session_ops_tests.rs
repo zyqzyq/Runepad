@@ -17,6 +17,15 @@ fn snapshot_with_content() -> SessionSnapshot {
         explorer_root: Some("C:/work".to_string()),
         expanded_paths: vec!["C:/work/src".to_string()],
         theme: Some("dark".to_string()),
+        sidebar_collapsed: true,
+        sidebar_width: Some(320),
+        window_state: Some(SessionWindowState {
+            x: 80,
+            y: 60,
+            width: 1200,
+            height: 820,
+            maximized: false,
+        }),
     }
 }
 
@@ -42,6 +51,18 @@ fn session_preview_roundtrips_to_snapshot_without_content() {
     assert_eq!(restored.tabs[0].content, None);
     assert!(restored.tabs[0].is_dirty);
     assert_eq!(restored.theme, Some("dark".to_string()));
+    assert!(restored.sidebar_collapsed);
+    assert_eq!(restored.sidebar_width, Some(320));
+    assert_eq!(
+        restored.window_state,
+        Some(SessionWindowState {
+            x: 80,
+            y: 60,
+            width: 1200,
+            height: 820,
+            maximized: false,
+        })
+    );
 }
 
 #[test]

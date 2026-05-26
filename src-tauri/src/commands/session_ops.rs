@@ -9,7 +9,7 @@ const SESSION_FILE: &str = "session.json";
 const SESSION_PREVIEW_FILE: &str = "session.preview.json";
 const MAX_SESSION_BYTES: usize = 8 * 1024 * 1024;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionTab {
     pub filepath: Option<String>,
@@ -24,6 +24,16 @@ pub struct SessionTab {
     pub is_dirty: bool,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionWindowState {
+    pub x: i32,
+    pub y: i32,
+    pub width: u32,
+    pub height: u32,
+    pub maximized: bool,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionSnapshot {
@@ -33,6 +43,10 @@ pub struct SessionSnapshot {
     pub explorer_root: Option<String>,
     pub expanded_paths: Vec<String>,
     pub theme: Option<String>,
+    #[serde(default)]
+    pub sidebar_collapsed: bool,
+    pub sidebar_width: Option<u32>,
+    pub window_state: Option<SessionWindowState>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -57,6 +71,10 @@ struct SessionPreview {
     pub explorer_root: Option<String>,
     pub expanded_paths: Vec<String>,
     pub theme: Option<String>,
+    #[serde(default)]
+    pub sidebar_collapsed: bool,
+    pub sidebar_width: Option<u32>,
+    pub window_state: Option<SessionWindowState>,
 }
 
 impl From<SessionTabPreview> for SessionTab {
@@ -83,6 +101,9 @@ impl From<SessionPreview> for SessionSnapshot {
             explorer_root: session.explorer_root,
             expanded_paths: session.expanded_paths,
             theme: session.theme,
+            sidebar_collapsed: session.sidebar_collapsed,
+            sidebar_width: session.sidebar_width,
+            window_state: session.window_state,
         }
     }
 }
@@ -110,6 +131,9 @@ impl From<&SessionSnapshot> for SessionPreview {
             explorer_root: session.explorer_root.clone(),
             expanded_paths: session.expanded_paths.clone(),
             theme: session.theme.clone(),
+            sidebar_collapsed: session.sidebar_collapsed,
+            sidebar_width: session.sidebar_width,
+            window_state: session.window_state.clone(),
         }
     }
 }
@@ -137,6 +161,13 @@ fn session_preview_path(app: &AppHandle) -> Result<PathBuf, String> {
         .app_data_dir()
         .map_err(|e| format!("Cannot resolve app data directory: {e}"))?;
     Ok(dir.join(SESSION_PREVIEW_FILE))
+}
+
+pub fn load_session_preview_window_state(app: &AppHandle) -> Option<SessionWindowState> {
+    let path = session_preview_path(app).ok()?;
+    let bytes = std::fs::read(path).ok()?;
+    let session: SessionPreview = serde_json::from_slice(&bytes).ok()?;
+    session.window_state
 }
 
 fn stage_session(cache: &SessionCache, session: &SessionSnapshot) -> Result<(), String> {

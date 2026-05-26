@@ -12,6 +12,7 @@ import { openFileInTab } from "@/lib/openFileInTab";
 import { persistSessionSnapshot } from "@/lib/persistSession";
 import { restoreSession } from "@/lib/restoreSession";
 import { startupMark, startupMeasure } from "@/lib/startupPerf";
+import { readCurrentWindowState } from "@/lib/windowState";
 import { useEditorStore } from "@/stores/editorStore";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useTabStore } from "@/stores/tabStore";
@@ -32,12 +33,6 @@ function waitForNextPaint(): Promise<void> {
 function getDebounceMs(): number {
   const hasDirty = useTabStore.getState().tabs.some((t) => t.isDirty);
   return hasDirty ? DIRTY_SAVE_DEBOUNCE_MS : SAVE_DEBOUNCE_MS;
-}
-
-function isSessionPersistFresh(lastPersistedAt: number): boolean {
-  return (
-    lastPersistedAt > 0 && Date.now() - lastPersistedAt < SAVE_DEBOUNCE_MS
-  );
 }
 
 async function openLaunchFiles(paths: string[]): Promise<void> {
@@ -70,14 +65,12 @@ export function useSessionRestore(): void {
   const restoreStarted = useRef(false);
   const restoreDone = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastPersistedAt = useRef(0);
   const queuedOpenPaths = useRef<string[]>([]);
 
   const persistSession = async (): Promise<void> => {
     if (!restoreDone.current) return;
     try {
       await persistSessionSnapshot();
-      lastPersistedAt.current = Date.now();
     } catch (e) {
       toast.error(toastErrorMessage(e));
     }
@@ -93,8 +86,7 @@ export function useSessionRestore(): void {
     }, delay);
   };
 
-  const flushSessionBeforeClose = (): void => {
-    const hadPendingSave = saveTimer.current !== null;
+  const flushSessionBeforeClose = async (): Promise<void> => {
     if (saveTimer.current) {
       clearTimeout(saveTimer.current);
       saveTimer.current = null;
@@ -102,15 +94,10 @@ export function useSessionRestore(): void {
 
     if (!restoreDone.current) return;
 
-    const skipCloseSave =
-      !hadPendingSave && isSessionPersistFresh(lastPersistedAt.current);
-    if (skipCloseSave) return;
-
     try {
-      const snapshot = buildSessionSnapshot();
-      void saveSession(snapshot).catch(() => {
-        // Window is closing; avoid toast noise
-      });
+      const windowState = await readCurrentWindowState();
+      const snapshot = buildSessionSnapshot({ windowState });
+      await saveSession(snapshot);
     } catch {
       // Do not block window close on snapshot build failure
     }
@@ -128,7 +115,7 @@ export function useSessionRestore(): void {
         startupMark("session-preview-load-start");
         const preview = await loadSessionPreview();
         startupMeasure("session-preview-load", "session-preview-load-start");
-        if (preview && preview.tabs.length > 0) {
+        if (preview) {
           await restoreSession(preview, {
             awaitActiveTabLoad: true,
             awaitExplorerRootLoad: true,
@@ -143,16 +130,18 @@ export function useSessionRestore(): void {
         startupMark("session-load-start");
         const snapshot = await loadSession();
         startupMeasure("session-load", "session-load-start");
-        if (snapshot && snapshot.tabs.length > 0) {
+        if (snapshot) {
           await restoreSession(snapshot, {
             awaitActiveTabLoad: !restoredPreview,
             reuseExistingTabIds: restoredPreview,
           });
-          toast.success(
-            getT()("toast.sessionRestored", {
-              count: String(snapshot.tabs.length),
-            }),
-          );
+          if (snapshot.tabs.length > 0) {
+            toast.success(
+              getT()("toast.sessionRestored", {
+                count: String(snapshot.tabs.length),
+              }),
+            );
+          }
           syncFileWatchesNow();
         } else if (!restoredPreview && useTabStore.getState().tabs.length === 0) {
           useTabStore.getState().addNewTab();
@@ -214,10 +203,12 @@ export function useSessionRestore(): void {
     // Window X is handled in Rust (CloseRequested -> emit). JS onCloseRequested
     // + destroy() is unreliable in dev; finish_window_close uses Rust destroy().
     void listen(WINDOW_CLOSING_EVENT, () => {
-      void finishWindowClose().catch(() => {
-        // Ignore; ExitRequested may still flush session cache
-      });
-      flushSessionBeforeClose();
+      void (async () => {
+        await flushSessionBeforeClose();
+        await finishWindowClose().catch(() => {
+          // Ignore; ExitRequested may still flush session cache
+        });
+      })();
     }).then((unlisten) => {
       if (!active) {
         unlisten();
@@ -234,7 +225,13 @@ export function useSessionRestore(): void {
       scheduleSave(SAVE_DEBOUNCE_MS),
     );
     const unsubUi = useUiStore.subscribe((state, prev) => {
-      if (state.theme !== prev.theme) scheduleSave(SAVE_DEBOUNCE_MS);
+      if (
+        state.theme !== prev.theme ||
+        state.sidebarCollapsed !== prev.sidebarCollapsed ||
+        state.sidebarWidth !== prev.sidebarWidth
+      ) {
+        scheduleSave(SAVE_DEBOUNCE_MS);
+      }
     });
 
     const onVisibility = (): void => {

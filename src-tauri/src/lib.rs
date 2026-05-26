@@ -11,7 +11,9 @@ use commands::session_ops::{
 };
 use commands::system_ops::{get_launch_files, launch_files_from_args, OPEN_FILES_EVENT};
 use commands::watch_ops::{sync_watched_dirs, unwatch_dir, WatchState};
-use commands::window_ops::{finish_window_close, reveal_main_window, WINDOW_CLOSING_EVENT};
+use commands::window_ops::{
+    finish_window_close, restore_main_window_before_show, reveal_main_window, WINDOW_CLOSING_EVENT,
+};
 use menu::{
     MENU_APP_ACTION_EVENT, MENU_APP_SETTINGS, MENU_EDIT_ACTION_EVENT, MENU_EDIT_FIND,
     MENU_EDIT_REPLACE, MENU_FILE_ACTION_EVENT, MENU_FILE_CLOSE, MENU_FILE_CLOSE_FOLDER,
@@ -41,6 +43,13 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(WatchState::default())
         .manage(SessionCache::default())
+        .setup(|app| {
+            if let Some(window) = app.get_webview_window("main") {
+                restore_main_window_before_show(app.handle(), &window);
+                reveal_main_window(&window);
+            }
+            Ok(())
+        })
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();

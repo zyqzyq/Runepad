@@ -9,7 +9,11 @@ import { setEditorContent } from "@/lib/setEditorContent";
 import { startupMark, startupMeasure } from "@/lib/startupPerf";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useTabStore } from "@/stores/tabStore";
-import { useUiStore, type ThemePreference } from "@/stores/uiStore";
+import {
+  DEFAULT_SIDEBAR_WIDTH,
+  useUiStore,
+  type ThemePreference,
+} from "@/stores/uiStore";
 import type { SessionSnapshot, SessionTab } from "@/types/session";
 import type { LineEnding, Tab } from "@/types/tab";
 
@@ -186,6 +190,12 @@ export async function restoreSession(
   ) {
     useUiStore.getState().setTheme(snapshot.theme as ThemePreference);
   }
+  useUiStore
+    .getState()
+    .setSidebarCollapsed(snapshot.sidebarCollapsed === true);
+  useUiStore
+    .getState()
+    .setSidebarWidth(snapshot.sidebarWidth ?? DEFAULT_SIDEBAR_WIDTH);
 
   tabStore.replaceTabs(restoredTabs, activeTab?.id ?? null);
   startupMeasure("session-ui-restored", "start");

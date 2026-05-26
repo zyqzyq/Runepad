@@ -4,10 +4,18 @@ import { editorInstances } from "@/lib/editorInstances";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useTabStore } from "@/stores/tabStore";
 import { useUiStore } from "@/stores/uiStore";
-import type { SessionSnapshot, SessionTab } from "@/types/session";
+import type {
+  SessionSnapshot,
+  SessionTab,
+  SessionWindowState,
+} from "@/types/session";
 import type { Tab } from "@/types/tab";
 
 const SESSION_VERSION = 2;
+
+interface BuildSessionSnapshotOptions {
+  windowState?: SessionWindowState | null;
+}
 
 function tabNeedsContent(tab: Tab): boolean {
   return tab.isDirty || tab.isNew || tab.filepath === null;
@@ -31,10 +39,12 @@ function tabToSessionTab(tab: Tab): SessionTab {
   };
 }
 
-export function buildSessionSnapshot(): SessionSnapshot {
+export function buildSessionSnapshot(
+  options: BuildSessionSnapshotOptions = {},
+): SessionSnapshot {
   const { tabs, activeId } = useTabStore.getState();
   const { rootPath, expandedPaths } = useExplorerStore.getState();
-  const { theme } = useUiStore.getState();
+  const { theme, sidebarCollapsed, sidebarWidth } = useUiStore.getState();
 
   const activeIndex = Math.max(
     0,
@@ -48,5 +58,8 @@ export function buildSessionSnapshot(): SessionSnapshot {
     explorerRoot: rootPath,
     expandedPaths: Object.keys(expandedPaths),
     theme,
+    sidebarCollapsed,
+    sidebarWidth,
+    windowState: options.windowState ?? null,
   };
 }
