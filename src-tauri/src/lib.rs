@@ -4,7 +4,7 @@ mod utils;
 
 use commands::dir_ops::read_dir;
 use commands::menu_ops::set_app_menu_locale;
-use commands::file_ops::{read_file, write_file};
+use commands::file_ops::{get_file_metadata, read_file, write_file};
 use commands::session_ops::{
     clear_session, flush_session_cache, load_session, load_session_preview, save_session,
     SessionCache,
@@ -77,6 +77,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             read_file,
+            get_file_metadata,
             write_file,
             read_dir,
             get_launch_files,

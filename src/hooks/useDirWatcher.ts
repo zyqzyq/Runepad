@@ -10,9 +10,9 @@ import {
   type DirChangedKind,
 } from "@/api/dirApi";
 import { collectWatchTargets } from "@/lib/collectWatchTargets";
+import { handleChangedTabFromDisk } from "@/lib/fileChangeDecision";
 import { parentDir } from "@/lib/parentDir";
 import { normalizePath, pathsMatch } from "@/lib/normalizePath";
-import { reloadTabFromDisk } from "@/lib/reloadTabFromDisk";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useTabStore } from "@/stores/tabStore";
 
@@ -93,14 +93,7 @@ export function useDirWatcher(): void {
         if (!tab.filepath) continue;
         if (!pathsMatch(tab.filepath, eventPath)) continue;
 
-        if (tab.isDirty) {
-          toast.info(
-            getT()("toast.fileChangedOnDisk", { filename: tab.filename }),
-          );
-          continue;
-        }
-
-        await reloadTabFromDisk(tab);
+        await handleChangedTabFromDisk(tab);
       }
     };
 

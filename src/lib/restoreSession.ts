@@ -1,12 +1,14 @@
 // Runepad | Module: restoreSession | Depends on: dirApi, openFileInTab, stores
 
 import { readDir } from "@/api/dirApi";
+import { getFileMetadata } from "@/api/fileApi";
 import { disposeTabEditor } from "@/lib/editorInstances";
 import { languageFromFilename } from "@/lib/languageFromFilename";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 import { loadTabContentFromDisk } from "@/lib/reloadTabFromDisk";
 import { setEditorContent } from "@/lib/setEditorContent";
 import { startupMark, startupMeasure } from "@/lib/startupPerf";
+import { useFileChangeStore } from "@/stores/fileChangeStore";
 import { useExplorerStore } from "@/stores/explorerStore";
 import { useTabStore } from "@/stores/tabStore";
 import {
@@ -37,11 +39,35 @@ function sessionTabToTab(st: SessionTab, existingId?: string): Tab {
     isDirty: st.isDirty,
     encoding: st.encoding,
     lineEnding: parseLineEnding(String(st.lineEnding)),
+    diskModifiedMs: st.diskModifiedMs,
     language:
       st.language && st.language !== "plaintext"
         ? st.language
         : filenameLanguage,
   };
+}
+
+async function enqueueIfDirtySessionFileChanged(
+  tab: Tab,
+  st: SessionTab,
+): Promise<void> {
+  if (
+    !tab.filepath ||
+    !st.isDirty ||
+    st.diskModifiedMs == null ||
+    !sessionTabHasCachedContent(st)
+  ) {
+    return;
+  }
+
+  try {
+    const metadata = await getFileMetadata(tab.filepath);
+    if (metadata.modifiedMs !== st.diskModifiedMs) {
+      useFileChangeStore.getState().enqueue(tab.id);
+    }
+  } catch {
+    // Missing or inaccessible files are handled by the existing reload paths.
+  }
 }
 
 function sessionTabHasCachedContent(st: SessionTab): boolean {
@@ -183,6 +209,14 @@ export async function restoreSession(
     }
   }
 
+  const changedFileChecks = restoredTabs
+    .map((tab, i) => {
+      const st = sessionTabs[i];
+      if (!tab || !st) return null;
+      return enqueueIfDirtySessionFileChanged(tab, st);
+    })
+    .filter((task): task is Promise<void> => task !== null);
+
   if (
     snapshot.theme === "light" ||
     snapshot.theme === "dark" ||
@@ -210,6 +244,8 @@ export async function restoreSession(
   if (awaitExplorerRootLoad && snapshot.explorerRoot) {
     await loadExplorerRoot(snapshot.explorerRoot);
   }
+
+  await Promise.all(changedFileChecks);
 
   restoreSessionInBackground(
     restoredTabs,

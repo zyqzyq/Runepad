@@ -135,13 +135,6 @@ export function useSessionRestore(): void {
             awaitActiveTabLoad: !restoredPreview,
             reuseExistingTabIds: restoredPreview,
           });
-          if (snapshot.tabs.length > 0) {
-            toast.success(
-              getT()("toast.sessionRestored", {
-                count: String(snapshot.tabs.length),
-              }),
-            );
-          }
           syncFileWatchesNow();
         } else if (!restoredPreview && useTabStore.getState().tabs.length === 0) {
           useTabStore.getState().addNewTab();

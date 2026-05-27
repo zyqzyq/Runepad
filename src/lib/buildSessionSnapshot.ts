@@ -36,6 +36,7 @@ function tabToSessionTab(tab: Tab): SessionTab {
     language: tab.language,
     content,
     isDirty: tab.isDirty,
+    diskModifiedMs: tab.diskModifiedMs,
   };
 }
 

@@ -8,6 +8,11 @@ export interface ReadFileResponse {
   content: string;
   encoding: string;
   lineEnding: LineEnding;
+  modifiedMs: number;
+}
+
+export interface FileMetadataResponse {
+  modifiedMs: number;
 }
 
 export async function readFile(path: string): Promise<ReadFileResponse> {
@@ -15,13 +20,21 @@ export async function readFile(path: string): Promise<ReadFileResponse> {
     content: string;
     encoding: string;
     lineEnding: string;
+    modifiedMs: number;
   }>("read_file", { path });
 
   return {
     content: result.content,
     encoding: result.encoding,
     lineEnding: result.lineEnding === "CRLF" ? "CRLF" : "LF",
+    modifiedMs: result.modifiedMs,
   };
+}
+
+export async function getFileMetadata(
+  path: string,
+): Promise<FileMetadataResponse> {
+  return invoke<FileMetadataResponse>("get_file_metadata", { path });
 }
 
 export async function writeFile(

@@ -23,12 +23,15 @@ export async function loadTabContentFromDisk(
   startupMark(mark);
   startupEvent("tab-content-load-start", `filename=${tab.filename}`);
   try {
-    const { content, encoding, lineEnding } = await readFile(tab.filepath);
+    const { content, encoding, lineEnding, modifiedMs } = await readFile(
+      tab.filepath,
+    );
     useTabStore.getState().updateTab(tab.id, {
       encoding,
       lineEnding,
       language: languageFromFilename(tab.filename),
       isDirty: false,
+      diskModifiedMs: modifiedMs,
     });
     setEditorContent(tab.id, content);
     useTabStore.getState().markDirty(tab.id, false);

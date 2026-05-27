@@ -13,6 +13,7 @@ fn snapshot_with_content() -> SessionSnapshot {
             language: "plaintext".to_string(),
             content: Some("unsaved text".to_string()),
             is_dirty: true,
+            disk_modified_ms: Some(1000),
         }],
         explorer_root: Some("C:/work".to_string()),
         expanded_paths: vec!["C:/work/src".to_string()],
@@ -38,6 +39,7 @@ fn session_preview_strips_tab_content() {
     assert!(!json.contains("content"));
     assert!(json.contains("scratch.txt"));
     assert!(json.contains("isDirty"));
+    assert!(json.contains("diskModifiedMs"));
 }
 
 #[test]
@@ -50,6 +52,7 @@ fn session_preview_roundtrips_to_snapshot_without_content() {
     assert_eq!(restored.tabs[0].filename, "scratch.txt");
     assert_eq!(restored.tabs[0].content, None);
     assert!(restored.tabs[0].is_dirty);
+    assert_eq!(restored.tabs[0].disk_modified_ms, Some(1000));
     assert_eq!(restored.theme, Some("dark".to_string()));
     assert!(restored.sidebar_collapsed);
     assert_eq!(restored.sidebar_width, Some(320));

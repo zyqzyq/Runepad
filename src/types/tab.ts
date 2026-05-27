@@ -9,4 +9,5 @@ export interface Tab {
   language: string;
   encoding: string;
   lineEnding: LineEnding;
+  diskModifiedMs?: number;
 }

@@ -1,6 +1,11 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { openDialog, saveDialog, writeFile } from "@/api/fileApi";
+import {
+  getFileMetadata,
+  openDialog,
+  saveDialog,
+  writeFile,
+} from "@/api/fileApi";
 import { getT, toastErrorMessage } from "@/i18n";
 import { useCloseTab } from "@/hooks/useCloseTab";
 import { getTextFileDialogFilters } from "@/lib/dialogFilters";
@@ -64,6 +69,7 @@ export function useFileActions(): {
           encoding: tab.encoding,
           lineEnding: tab.lineEnding,
         });
+        const metadata = await getFileMetadata(path);
 
         const filename = basename(path);
         updateTab(tabId, {
@@ -72,6 +78,7 @@ export function useFileActions(): {
           isNew: false,
           isDirty: false,
           language: languageFromFilename(filename),
+          diskModifiedMs: metadata.modifiedMs,
         });
         markDirty(tabId, false);
         useRecentFilesStore.getState().push(path);

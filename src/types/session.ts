@@ -9,6 +9,7 @@ export interface SessionTab {
   language: string;
   content?: string;
   isDirty: boolean;
+  diskModifiedMs?: number;
 }
 
 export interface SessionWindowState {

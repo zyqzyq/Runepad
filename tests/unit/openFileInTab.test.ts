@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetStores, makeTab } from "../helpers/storeState";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 import { openFileInTab } from "@/lib/openFileInTab";
+import { useFileChangeStore } from "@/stores/fileChangeStore";
 import { useRecentFilesStore } from "@/stores/recentFilesStore";
 import { useTabStore } from "@/stores/tabStore";
 
@@ -43,6 +44,15 @@ describe("openFileInTab", () => {
 
     expect(useTabStore.getState().activeId).toBe("existing");
     expect(useTabStore.getState().tabs).toHaveLength(2);
+  });
+
+  it("queues a reload decision when opening an already-open dirty file", async () => {
+    useTabStore.getState().markDirty("existing", true);
+
+    await openFileInTab("c:/WORK/a.txt");
+
+    expect(useTabStore.getState().activeId).toBe("existing");
+    expect(useFileChangeStore.getState().pendingTabIds).toEqual(["existing"]);
   });
 
   it("opens a new file with pending content and recent file entry", async () => {

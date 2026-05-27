@@ -49,6 +49,10 @@ export type MessageKey =
   | "closeTab.cancel"
   | "closeTab.discard"
   | "closeTab.save"
+  | "fileChange.title"
+  | "fileChange.description"
+  | "fileChange.keep"
+  | "fileChange.discardReload"
   | "sidebar.explorer"
   | "sidebar.expand"
   | "sidebar.collapse"
@@ -65,10 +69,8 @@ export type MessageKey =
   | "dialog.filter.textFiles"
   | "dialog.filter.allFiles"
   | "toast.saved"
-  | "toast.sessionRestored"
   | "toast.sessionRestoreFailed"
   | "toast.fileWatchFailed"
-  | "toast.fileChangedOnDisk"
   | "toast.reloadFailed"
   | "toast.error";
 
@@ -121,6 +123,11 @@ const zhCN: Record<MessageKey, string> = {
   "closeTab.cancel": "取消",
   "closeTab.discard": "不保存",
   "closeTab.save": "保存",
+  "fileChange.title": "文件已在磁盘上更改",
+  "fileChange.description":
+    "“{filename}”有未保存的编辑。保留当前编辑，还是丢弃修改并加载本地文件？",
+  "fileChange.keep": "保留当前编辑",
+  "fileChange.discardReload": "丢弃并加载",
   "sidebar.explorer": "资源管理器",
   "sidebar.expand": "展开侧栏",
   "sidebar.collapse": "折叠侧栏",
@@ -137,10 +144,8 @@ const zhCN: Record<MessageKey, string> = {
   "dialog.filter.textFiles": "文本文件",
   "dialog.filter.allFiles": "所有文件",
   "toast.saved": "已保存 {filename}",
-  "toast.sessionRestored": "已恢复 {count} 个标签",
   "toast.sessionRestoreFailed": "会话恢复失败：{message}",
   "toast.fileWatchFailed": "文件监视失败：{message}",
-  "toast.fileChangedOnDisk": "{filename} 已在磁盘上更改（标签页有未保存的编辑）",
   "toast.reloadFailed": "无法重新加载 {filename}：{message}",
   "toast.error": "{message}",
 };
@@ -196,6 +201,11 @@ const enUS: Record<MessageKey, string> = {
   "closeTab.cancel": "Cancel",
   "closeTab.discard": "Don't save",
   "closeTab.save": "Save",
+  "fileChange.title": "File changed on disk",
+  "fileChange.description":
+    "'{filename}' has unsaved edits. Keep your current edits, or discard them and load the local file?",
+  "fileChange.keep": "Keep current edits",
+  "fileChange.discardReload": "Discard and reload",
   "sidebar.explorer": "Explorer",
   "sidebar.expand": "Expand sidebar",
   "sidebar.collapse": "Collapse sidebar",
@@ -212,11 +222,8 @@ const enUS: Record<MessageKey, string> = {
   "dialog.filter.textFiles": "Text files",
   "dialog.filter.allFiles": "All files",
   "toast.saved": "Saved {filename}",
-  "toast.sessionRestored": "Restored {count} tab(s)",
   "toast.sessionRestoreFailed": "Session restore failed: {message}",
   "toast.fileWatchFailed": "File watch failed: {message}",
-  "toast.fileChangedOnDisk":
-    "{filename} was changed on disk (tab has unsaved edits)",
   "toast.reloadFailed": "Could not reload {filename}: {message}",
   "toast.error": "{message}",
 };

@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect } from "react";
+import { FileChangeHost } from "@/components/layout/FileChangeHost";
 import { editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 import { loadTabContentFromDisk } from "@/lib/reloadTabFromDisk";
+import { useFileChangeStore } from "@/stores/fileChangeStore";
 import { useTabStore } from "@/stores/tabStore";
 
 const EditorPanel = lazy(() =>
@@ -24,6 +26,9 @@ function EditorAreaFallback(): JSX.Element {
 export function EditorArea(): JSX.Element {
   const tabs = useTabStore((s) => s.tabs);
   const activeId = useTabStore((s) => s.activeId);
+  const pendingFileChangeCount = useFileChangeStore(
+    (s) => s.pendingTabIds.length,
+  );
   const activeTab = tabs.find((tab) => tab.id === activeId);
 
   useEffect(() => {
@@ -55,6 +60,7 @@ export function EditorArea(): JSX.Element {
           <EditorAreaFallback />
         )}
       </Suspense>
+      {pendingFileChangeCount > 0 && <FileChangeHost />}
     </div>
   );
 }

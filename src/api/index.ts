@@ -2,12 +2,13 @@
 
 export {
   readFile,
+  getFileMetadata,
   writeFile,
   openDialog,
   openFolderDialog,
   saveDialog,
 } from "./fileApi";
-export type { ReadFileResponse } from "./fileApi";
+export type { FileMetadataResponse, ReadFileResponse } from "./fileApi";
 export { readDir } from "./dirApi";
 export { getLaunchFiles } from "./systemApi";
 export {

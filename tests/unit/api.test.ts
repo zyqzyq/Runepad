@@ -5,6 +5,7 @@ import { readDir, syncWatchedDirs, unwatchDir } from "@/api/dirApi";
 import {
   openDialog,
   openFolderDialog,
+  getFileMetadata,
   readFile,
   saveDialog,
   writeFile,
@@ -28,14 +29,27 @@ describe("Tauri API wrappers", () => {
       content: "hello",
       encoding: "UTF-8",
       lineEnding: "CRLF",
+      modifiedMs: 1234,
     });
 
     await expect(readFile("C:/work/a.txt")).resolves.toEqual({
       content: "hello",
       encoding: "UTF-8",
       lineEnding: "CRLF",
+      modifiedMs: 1234,
     });
     expect(invokeMock).toHaveBeenCalledWith("read_file", { path: "C:/work/a.txt" });
+  });
+
+  it("wraps file metadata", async () => {
+    invokeMock.mockResolvedValue({ modifiedMs: 5678 });
+
+    await expect(getFileMetadata("C:/work/a.txt")).resolves.toEqual({
+      modifiedMs: 5678,
+    });
+    expect(invokeMock).toHaveBeenCalledWith("get_file_metadata", {
+      path: "C:/work/a.txt",
+    });
   });
 
   it("passes write_file encoding and line ending options", async () => {

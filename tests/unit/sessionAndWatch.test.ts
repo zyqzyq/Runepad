@@ -27,6 +27,7 @@ describe("session and watch helpers", () => {
         filepath: "C:/work/a.txt",
         isDirty: true,
         isNew: false,
+        diskModifiedMs: 1000,
       }),
       makeTab({
         id: "tab-b",
@@ -74,7 +75,12 @@ describe("session and watch helpers", () => {
         maximized: false,
       },
       tabs: [
-        { filename: "a.txt", content: "dirty text", isDirty: true },
+        {
+          filename: "a.txt",
+          content: "dirty text",
+          isDirty: true,
+          diskModifiedMs: 1000,
+        },
         { filename: "b.ts", content: undefined, isDirty: false },
       ],
     });

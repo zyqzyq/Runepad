@@ -13,6 +13,7 @@ interface TabStore {
     encoding: string;
     lineEnding: LineEnding;
     language: string;
+    diskModifiedMs?: number;
   }) => string;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
@@ -37,6 +38,7 @@ function createEmptyTab(): Tab {
     language: "plaintext",
     encoding: "UTF-8",
     lineEnding: "LF",
+    diskModifiedMs: undefined,
   };
 }
 
@@ -62,6 +64,7 @@ export const useTabStore = create<TabStore>((set, get) => ({
       language: params.language,
       encoding: params.encoding,
       lineEnding: params.lineEnding,
+      diskModifiedMs: params.diskModifiedMs,
     };
     set((s) => ({ tabs: [...s.tabs, tab], activeId: tab.id }));
     return tab.id;

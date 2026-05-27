@@ -22,6 +22,8 @@ pub struct SessionTab {
     pub content: Option<String>,
     #[serde(default)]
     pub is_dirty: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub disk_modified_ms: Option<u64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -60,6 +62,8 @@ struct SessionTabPreview {
     pub language: String,
     #[serde(default)]
     pub is_dirty: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub disk_modified_ms: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -88,6 +92,7 @@ impl From<SessionTabPreview> for SessionTab {
             language: tab.language,
             content: None,
             is_dirty: tab.is_dirty,
+            disk_modified_ms: tab.disk_modified_ms,
         }
     }
 }
@@ -118,6 +123,7 @@ impl From<&SessionTab> for SessionTabPreview {
             line_ending: tab.line_ending.clone(),
             language: tab.language.clone(),
             is_dirty: tab.is_dirty,
+            disk_modified_ms: tab.disk_modified_ms,
         }
     }
 }

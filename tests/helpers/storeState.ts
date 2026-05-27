@@ -3,6 +3,7 @@ import { pendingInitialDocs } from "@/lib/pendingDocs";
 import { useCloseTabStore } from "@/stores/closeTabStore";
 import { useEditorStore } from "@/stores/editorStore";
 import { useExplorerStore } from "@/stores/explorerStore";
+import { useFileChangeStore } from "@/stores/fileChangeStore";
 import { useRecentFilesStore } from "@/stores/recentFilesStore";
 import { DEFAULT_SETTINGS, useSettingsStore } from "@/stores/settingsStore";
 import { useTabStore } from "@/stores/tabStore";
@@ -19,6 +20,7 @@ export function makeTab(patch: Partial<Tab> = {}): Tab {
     language: patch.language ?? "plaintext",
     encoding: patch.encoding ?? "UTF-8",
     lineEnding: patch.lineEnding ?? "LF",
+    diskModifiedMs: patch.diskModifiedMs,
   };
 }
 
@@ -40,6 +42,7 @@ export function resetStores(tabs: Tab[] = [makeTab({ id: "tab-1" })]): void {
   useSettingsStore.setState(DEFAULT_SETTINGS);
   useEditorStore.setState({ metaByDocId: {} });
   useCloseTabStore.setState({ pendingTabId: null });
+  useFileChangeStore.setState({ pendingTabIds: [] });
   editorInstances.clear();
   pendingInitialDocs.clear();
 }

@@ -17,6 +17,20 @@ async fn reads_utf8_file_with_line_ending_metadata() {
     assert_eq!(result.content, "a\r\nb");
     assert_eq!(result.encoding, "UTF-8");
     assert_eq!(result.line_ending, "CRLF");
+    assert!(result.modified_ms > 0);
+    let _ = fs::remove_file(path);
+}
+
+#[tokio::test]
+async fn reads_file_metadata_modified_time() {
+    let path = temp_file("metadata.txt");
+    fs::write(&path, "metadata").expect("write fixture");
+
+    let result = get_file_metadata(path.to_string_lossy().into_owned())
+        .await
+        .expect("read metadata");
+
+    assert!(result.modified_ms > 0);
     let _ = fs::remove_file(path);
 }
 

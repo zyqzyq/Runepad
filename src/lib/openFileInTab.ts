@@ -5,6 +5,7 @@ import { syncFileWatchesNow } from "@/hooks/useDirWatcher";
 import { basename, languageFromFilename } from "@/lib/languageFromFilename";
 import { normalizePath } from "@/lib/normalizePath";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
+import { useFileChangeStore } from "@/stores/fileChangeStore";
 import { useRecentFilesStore } from "@/stores/recentFilesStore";
 import { useTabStore } from "@/stores/tabStore";
 
@@ -16,10 +17,13 @@ export async function openFileInTab(path: string): Promise<void> {
   );
   if (existing) {
     setActiveTab(existing.id);
+    if (existing.isDirty) {
+      useFileChangeStore.getState().enqueue(existing.id);
+    }
     return;
   }
 
-  const { content, encoding, lineEnding } = await readFile(path);
+  const { content, encoding, lineEnding, modifiedMs } = await readFile(path);
   const filename = basename(path);
   const language = languageFromFilename(filename);
   const tabId = crypto.randomUUID();
@@ -31,6 +35,7 @@ export async function openFileInTab(path: string): Promise<void> {
     encoding,
     lineEnding,
     language,
+    diskModifiedMs: modifiedMs,
   });
   useRecentFilesStore.getState().push(path);
   syncFileWatchesNow();
