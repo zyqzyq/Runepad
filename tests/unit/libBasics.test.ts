@@ -7,6 +7,10 @@ describe("path and filename helpers", () => {
   it("detects supported editor languages by extension", () => {
     expect(languageFromFilename("app.tsx")).toBe("javascript");
     expect(languageFromFilename("package.json")).toBe("json");
+    expect(languageFromFilename("data.jsonc")).toBe("json");
+    expect(languageFromFilename("script.py")).toBe("python");
+    expect(languageFromFilename("config.yaml")).toBe("yaml");
+    expect(languageFromFilename("config.yml")).toBe("yaml");
     expect(languageFromFilename("README.md")).toBe("markdown");
     expect(languageFromFilename("notes.txt")).toBe("plaintext");
   });

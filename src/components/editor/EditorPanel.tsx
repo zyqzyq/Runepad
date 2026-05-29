@@ -1,5 +1,5 @@
 import { history } from "@codemirror/commands";
-import { indentUnit } from "@codemirror/language";
+import { foldGutter, foldKeymap, indentUnit } from "@codemirror/language";
 import { search, searchKeymap } from "@codemirror/search";
 import { Compartment, EditorState, Prec, type Extension } from "@codemirror/state";
 import {
@@ -83,6 +83,7 @@ export function EditorPanel({
         highlightActiveLine(),
         history(),
         search({ top: true }),
+        foldGutter(),
         indentUnit.of("    "),
         EditorState.tabSize.of(4),
         Prec.highest(
@@ -102,7 +103,7 @@ export function EditorPanel({
             },
           ]),
         ),
-        keymap.of([...editorKeymap, ...searchKeymap]),
+        keymap.of([...editorKeymap, ...searchKeymap, ...foldKeymap]),
         themeCompartment.of(
           getCodemirrorTheme(useUiStore.getState().resolvedTheme),
         ),

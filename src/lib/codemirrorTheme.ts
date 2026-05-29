@@ -35,6 +35,15 @@ function buildEditorTheme(vars: EditorCssVars, dark: boolean): Extension {
         color: vars.gutterFg,
         border: "none",
       },
+      ".cm-foldGutter span": {
+        color: vars.gutterFg,
+        cursor: "pointer",
+      },
+      ".cm-foldPlaceholder": {
+        backgroundColor: vars.gutterBg,
+        borderColor: vars.gutterFg,
+        color: vars.foreground,
+      },
     },
     { dark },
   );

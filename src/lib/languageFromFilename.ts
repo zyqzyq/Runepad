@@ -10,7 +10,10 @@ export function languageFromFilename(filename: string): string {
     case "tsx":
       return "javascript";
     case "json":
+    case "jsonc":
       return "json";
+    case "py":
+      return "python";
     case "md":
     case "markdown":
       return "markdown";

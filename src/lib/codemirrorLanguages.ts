@@ -1,10 +1,6 @@
 // Runepad | Module: codemirrorLanguages | Depends on: @codemirror/language
 
-import { EditorState, type Extension } from "@codemirror/state";
-
-const yamlCommentLanguageData = EditorState.languageData.of(() => [
-  { commentTokens: { line: "#" } },
-]);
+import type { Extension } from "@codemirror/state";
 
 export async function loadLanguageExtension(
   language: string,
@@ -22,8 +18,14 @@ export async function loadLanguageExtension(
       const { markdown } = await import("@codemirror/lang-markdown");
       return markdown();
     }
-    case "yaml":
-      return yamlCommentLanguageData;
+    case "python": {
+      const { python } = await import("@codemirror/lang-python");
+      return python();
+    }
+    case "yaml": {
+      const { yaml } = await import("@codemirror/lang-yaml");
+      return yaml();
+    }
     default:
       return null;
   }
