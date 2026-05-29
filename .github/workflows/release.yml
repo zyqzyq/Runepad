@@ -76,13 +76,9 @@ jobs:
           SECTION=$(echo "$SECTION" | sed '/./,$!d')
 
           if [ -n "$SECTION" ]; then
-            BODY="## 更新内容
-
-${SECTION}"
+            BODY=$(printf "## 更新内容\n\n%s" "$SECTION")
           else
-            BODY="## 更新内容
-
-暂无变更记录。"
+            BODY=$(printf "## 更新内容\n\n暂无变更记录。")
           fi
 
           {
