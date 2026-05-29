@@ -1,7 +1,7 @@
 ## AI 开发指导手册 (AGENTS.md)
 
 > 本文件是项目的「宪法」，Cursor 每次对话会注入全文。详细参考见 [`docs/`](docs/)；人类上手见 [`README.md`](README.md)。
-> 版本: 0.6.0 | 最后更新: 2026-05-26
+> 版本: 0.6.0 | 最后更新: 2026-05-29
 
 ### 文档索引（按需阅读）
 
@@ -13,7 +13,7 @@
 | [`docs/UI.md`](docs/UI.md) | 布局、主题、菜单、快捷键 |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | 安装、构建、类型检查、验收命令 |
 | [`docs/STARTUP.md`](docs/STARTUP.md) | 启动性能、会话预览恢复、首屏约束 |
-| [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | 文档版本历史 |
+| [`docs/DOCS_HISTORY.md`](docs/DOCS_HISTORY.md) | 文档结构历史 |
 | [`docs/CODE_READING.md`](docs/CODE_READING.md) | 给人类读代码的导览；**AI 默认不读**，除非用户明确要求 |
 
 **契约单一事实来源**：`src/api/*.ts`、`src/types/*.ts`、`src/stores/*.ts` — 不假设接口存在；修改契约时同步 Rust 与 capabilities。
@@ -120,6 +120,7 @@
 4. TS：IPC `try/catch`；用户可见错误 `toast.error(toastErrorMessage(e))`
 5. 单一职责；**禁止** `export *`
 6. 交付时简短说明改了什么、为何改；**禁止**擅自扩大范围或静默删逻辑
+7. 涉及用户可见的功能新增、变更或修复时，**同步更新**根目录 `CHANGELOG.md` 的 `[未发布]` 区块；版本号与发布日期由维护者在 release 时统一更新
 
 ### Codex / pnpm 运行说明（Windows）
 
