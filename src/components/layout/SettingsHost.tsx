@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FontSetting } from "@/components/settings/FontSetting";
 import { LocaleSetting } from "@/components/settings/LocaleSetting";
+import { SyntaxThemeSetting } from "@/components/settings/SyntaxThemeSetting";
 import { ThemeSetting } from "@/components/settings/ThemeSetting";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ export function SettingsHost(): JSX.Element {
   const applySettings = useSettingsStore((s) => s.applySettings);
   const editorFontFamily = useSettingsStore((s) => s.editorFontFamily);
   const editorFontSize = useSettingsStore((s) => s.editorFontSize);
+  const editorSyntaxTheme = useSettingsStore((s) => s.editorSyntaxTheme);
   const locale = useSettingsStore((s) => s.locale);
   const { t } = useI18n();
   const [draft, setDraft] = useState<SettingsDraft>({
@@ -43,16 +45,18 @@ export function SettingsHost(): JSX.Element {
     setDraft({
       editorFontFamily,
       editorFontSize,
+      editorSyntaxTheme,
       locale,
       theme,
     });
-  }, [editorFontFamily, editorFontSize, locale, open, theme]);
+  }, [editorFontFamily, editorFontSize, editorSyntaxTheme, locale, open, theme]);
 
   const commitDraft = (): void => {
     setTheme(draft.theme);
     applySettings({
       editorFontFamily: draft.editorFontFamily,
       editorFontSize: draft.editorFontSize,
+      editorSyntaxTheme: draft.editorSyntaxTheme,
       locale: draft.locale,
     });
   };
@@ -110,6 +114,17 @@ export function SettingsHost(): JSX.Element {
                 }))
               }
             />
+            <div className="mt-4">
+              <SyntaxThemeSetting
+                value={draft.editorSyntaxTheme}
+                onChange={(nextEditorSyntaxTheme) =>
+                  setDraft((current) => ({
+                    ...current,
+                    editorSyntaxTheme: nextEditorSyntaxTheme,
+                  }))
+                }
+              />
+            </div>
           </TabsContent>
           <TabsContent value="language" className="pt-4">
             <LocaleSetting

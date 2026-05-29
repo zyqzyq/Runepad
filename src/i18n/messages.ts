@@ -20,6 +20,14 @@ export type MessageKey =
   | "settings.font.preset.consolas"
   | "settings.font.preset.jetbrains"
   | "settings.font.preset.fira"
+  | "settings.syntaxTheme.label"
+  | "settings.syntaxTheme.default"
+  | "settings.syntaxTheme.vscodeDark"
+  | "settings.syntaxTheme.githubLight"
+  | "settings.syntaxTheme.dracula"
+  | "settings.syntaxTheme.nord"
+  | "settings.syntaxTheme.tokyoNight"
+  | "settings.syntaxTheme.xcodeLight"
   | "settings.locale.label"
   | "settings.locale.zh"
   | "settings.locale.en"
@@ -94,6 +102,14 @@ const zhCN: Record<MessageKey, string> = {
   "settings.font.preset.consolas": "Consolas",
   "settings.font.preset.jetbrains": "JetBrains Mono",
   "settings.font.preset.fira": "Fira Code",
+  "settings.syntaxTheme.label": "语法主题",
+  "settings.syntaxTheme.default": "Runepad 默认",
+  "settings.syntaxTheme.vscodeDark": "VS Code Dark",
+  "settings.syntaxTheme.githubLight": "GitHub Light",
+  "settings.syntaxTheme.dracula": "Dracula",
+  "settings.syntaxTheme.nord": "Nord",
+  "settings.syntaxTheme.tokyoNight": "Tokyo Night",
+  "settings.syntaxTheme.xcodeLight": "Xcode Light",
   "settings.locale.label": "界面语言",
   "settings.locale.zh": "简体中文",
   "settings.locale.en": "English",
@@ -170,6 +186,14 @@ const enUS: Record<MessageKey, string> = {
   "settings.font.preset.consolas": "Consolas",
   "settings.font.preset.jetbrains": "JetBrains Mono",
   "settings.font.preset.fira": "Fira Code",
+  "settings.syntaxTheme.label": "Syntax theme",
+  "settings.syntaxTheme.default": "Runepad default",
+  "settings.syntaxTheme.vscodeDark": "VS Code Dark",
+  "settings.syntaxTheme.githubLight": "GitHub Light",
+  "settings.syntaxTheme.dracula": "Dracula",
+  "settings.syntaxTheme.nord": "Nord",
+  "settings.syntaxTheme.tokyoNight": "Tokyo Night",
+  "settings.syntaxTheme.xcodeLight": "Xcode Light",
   "settings.locale.label": "Interface language",
   "settings.locale.zh": "简体中文",
   "settings.locale.en": "English",

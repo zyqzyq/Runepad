@@ -1,10 +1,8 @@
 import { history } from "@codemirror/commands";
 import {
-  defaultHighlightStyle,
   foldGutter,
   foldKeymap,
   indentUnit,
-  syntaxHighlighting,
 } from "@codemirror/language";
 import { search, searchKeymap } from "@codemirror/search";
 import { Compartment, EditorState, Prec, type Extension } from "@codemirror/state";
@@ -17,6 +15,7 @@ import {
 } from "@codemirror/view";
 import { useEffect, useRef } from "react";
 import { getCodemirrorTheme, getEditorFontTheme } from "@/lib/codemirrorTheme";
+import { getEditorSyntaxThemeExtension } from "@/lib/codemirrorSyntaxThemes";
 import { loadLanguageExtension } from "@/lib/codemirrorLanguages";
 import { editorKeymap } from "@/lib/editorKeymap";
 import {
@@ -56,10 +55,12 @@ export function EditorPanel({
   const containerRef = useRef<HTMLDivElement>(null);
   const themeCompartment = useRef(new Compartment()).current;
   const fontCompartment = useRef(new Compartment()).current;
+  const syntaxThemeCompartment = useRef(new Compartment()).current;
   const languageCompartment = useRef(new Compartment()).current;
   const resolvedTheme = useUiStore((s) => s.resolvedTheme);
   const editorFontFamily = useSettingsStore((s) => s.editorFontFamily);
   const editorFontSize = useSettingsStore((s) => s.editorFontSize);
+  const editorSyntaxTheme = useSettingsStore((s) => s.editorSyntaxTheme);
   const markDirty = useTabStore((s) => s.markDirty);
   const setMeta = useEditorStore((s) => s.setMeta);
 
@@ -90,7 +91,6 @@ export function EditorPanel({
         history(),
         search({ top: true }),
         foldGutter(),
-        syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         indentUnit.of("    "),
         EditorState.tabSize.of(4),
         Prec.highest(
@@ -111,6 +111,11 @@ export function EditorPanel({
           ]),
         ),
         keymap.of([...editorKeymap, ...searchKeymap, ...foldKeymap]),
+        syntaxThemeCompartment.of(
+          getEditorSyntaxThemeExtension(
+            useSettingsStore.getState().editorSyntaxTheme,
+          ),
+        ),
         themeCompartment.of(
           getCodemirrorTheme(useUiStore.getState().resolvedTheme),
         ),
@@ -150,6 +155,7 @@ export function EditorPanel({
     languageCompartment,
     markDirty,
     setMeta,
+    syntaxThemeCompartment,
     themeCompartment,
   ]);
 
@@ -170,6 +176,16 @@ export function EditorPanel({
       ),
     });
   }, [docId, editorFontFamily, editorFontSize, fontCompartment]);
+
+  useEffect(() => {
+    const view = editorInstances.get(docId);
+    if (!view) return;
+    view.dispatch({
+      effects: syntaxThemeCompartment.reconfigure(
+        getEditorSyntaxThemeExtension(editorSyntaxTheme),
+      ),
+    });
+  }, [docId, editorSyntaxTheme, syntaxThemeCompartment]);
 
   useEffect(() => {
     const view = editorInstances.get(docId);

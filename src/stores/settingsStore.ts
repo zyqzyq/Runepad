@@ -1,4 +1,16 @@
 import { create } from "zustand";
+import {
+  DEFAULT_EDITOR_SYNTAX_THEME,
+  EDITOR_SYNTAX_THEME_IDS,
+  isEditorSyntaxTheme,
+  type EditorSyntaxTheme,
+} from "@/lib/editorSyntaxThemeIds";
+
+export {
+  DEFAULT_EDITOR_SYNTAX_THEME,
+  EDITOR_SYNTAX_THEME_IDS,
+  isEditorSyntaxTheme,
+};
 
 const STORAGE_KEY = "runepad:settings";
 
@@ -30,12 +42,14 @@ function defaultLocale(): AppLocale {
 export interface PersistedSettings {
   editorFontFamily: string;
   editorFontSize: number;
+  editorSyntaxTheme: EditorSyntaxTheme;
   locale: AppLocale;
 }
 
 export const DEFAULT_SETTINGS: PersistedSettings = {
   editorFontFamily: DEFAULT_EDITOR_FONT_FAMILY,
   editorFontSize: 14,
+  editorSyntaxTheme: DEFAULT_EDITOR_SYNTAX_THEME,
   locale: defaultLocale(),
 };
 
@@ -56,12 +70,15 @@ function loadSettings(): PersistedSettings {
       EDITOR_FONT_SIZES.includes(obj.editorFontSize as (typeof EDITOR_FONT_SIZES)[number])
         ? obj.editorFontSize
         : DEFAULT_SETTINGS.editorFontSize;
+    const editorSyntaxTheme = isEditorSyntaxTheme(obj.editorSyntaxTheme)
+      ? obj.editorSyntaxTheme
+      : DEFAULT_SETTINGS.editorSyntaxTheme;
     const locale =
       obj.locale === "zh-CN" || obj.locale === "en-US"
         ? obj.locale
         : DEFAULT_SETTINGS.locale;
 
-    return { editorFontFamily, editorFontSize, locale };
+    return { editorFontFamily, editorFontSize, editorSyntaxTheme, locale };
   } catch {
     return DEFAULT_SETTINGS;
   }
@@ -80,6 +97,7 @@ interface SettingsStore extends PersistedSettings {
   resetSettings: () => void;
   setEditorFontFamily: (family: string) => void;
   setEditorFontSize: (size: number) => void;
+  setEditorSyntaxTheme: (theme: EditorSyntaxTheme) => void;
   setLocale: (locale: AppLocale) => void;
 }
 
@@ -103,6 +121,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     saveSettings({
       editorFontFamily: next.editorFontFamily,
       editorFontSize: next.editorFontSize,
+      editorSyntaxTheme: next.editorSyntaxTheme,
       locale: next.locale,
     });
     set({ editorFontFamily });
@@ -113,9 +132,21 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     saveSettings({
       editorFontFamily: next.editorFontFamily,
       editorFontSize: next.editorFontSize,
+      editorSyntaxTheme: next.editorSyntaxTheme,
       locale: next.locale,
     });
     set({ editorFontSize });
+  },
+
+  setEditorSyntaxTheme: (editorSyntaxTheme) => {
+    const next = { ...get(), editorSyntaxTheme };
+    saveSettings({
+      editorFontFamily: next.editorFontFamily,
+      editorFontSize: next.editorFontSize,
+      editorSyntaxTheme: next.editorSyntaxTheme,
+      locale: next.locale,
+    });
+    set({ editorSyntaxTheme });
   },
 
   setLocale: (locale) => {
@@ -123,6 +154,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     saveSettings({
       editorFontFamily: next.editorFontFamily,
       editorFontSize: next.editorFontSize,
+      editorSyntaxTheme: next.editorSyntaxTheme,
       locale: next.locale,
     });
     set({ locale });
