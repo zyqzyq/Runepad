@@ -71,12 +71,25 @@ jobs:
         run: |
           TAG_NAME="${{ github.ref_name }}"
           VERSION="${TAG_NAME#v}"
-          BODY=$(awk "/^## \\[$VERSION\\]/{flag=1;next}/^## \\[/{flag=0}flag" CHANGELOG.md)
-          # GitHub Actions multiline output escaping
-          BODY="${BODY//'%'/'%25'}"
-          BODY="${BODY//$'\n'/'%0A'}"
-          BODY="${BODY//$'\r'/'%0D'}"
-          echo "body=$BODY" >> "$GITHUB_OUTPUT"
+          SECTION=$(awk "/^## \\[$VERSION\\]/{flag=1;next}/^## \\[/{flag=0}flag" CHANGELOG.md)
+          # Trim leading blank lines
+          SECTION=$(echo "$SECTION" | sed '/./,$!d')
+
+          if [ -n "$SECTION" ]; then
+            BODY="## 更新内容
+
+${SECTION}"
+          else
+            BODY="## 更新内容
+
+暂无变更记录。"
+          fi
+
+          {
+            echo "body<<CHANGELOG_EOF"
+            printf '%s\n' "$BODY"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0
