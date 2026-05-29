@@ -13,7 +13,11 @@ import { useEffect, useRef } from "react";
 import { getCodemirrorTheme, getEditorFontTheme } from "@/lib/codemirrorTheme";
 import { loadLanguageExtension } from "@/lib/codemirrorLanguages";
 import { editorKeymap } from "@/lib/editorKeymap";
-import { closeFindPanelIfOpen, toggleFindPanel } from "@/lib/editorSearch";
+import {
+  closeFindPanelIfOpen,
+  toggleFindPanel,
+  toggleReplacePanel,
+} from "@/lib/editorSearch";
 import { destroyEditorInstance, editorInstances } from "@/lib/editorInstances";
 import { pendingInitialDocs } from "@/lib/pendingDocs";
 import { startupMeasure } from "@/lib/startupPerf";
@@ -85,6 +89,11 @@ export function EditorPanel({
           keymap.of([
             { key: "Mod-f", run: toggleFindPanel },
             { key: "Mod-f", run: toggleFindPanel, scope: "editor search-panel" },
+            {
+              key: "Mod-r",
+              run: toggleReplacePanel,
+              scope: "editor search-panel",
+            },
             { key: "Escape", run: closeFindPanelIfOpen },
             {
               key: "Escape",

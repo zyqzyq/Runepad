@@ -1,13 +1,19 @@
 import { useEffect } from "react";
 import { useFileActions } from "@/hooks/useFileActions";
 import { editorInstances } from "@/lib/editorInstances";
-import { openReplacePanel, toggleFindPanel } from "@/lib/editorSearch";
+import { toggleFindPanel, toggleReplacePanel } from "@/lib/editorSearch";
 import { useTabStore } from "@/stores/tabStore";
 import { useUiStore } from "@/stores/uiStore";
 
 function isModKey(e: KeyboardEvent): boolean {
   const isMac = navigator.platform.toUpperCase().includes("MAC");
   return isMac ? e.metaKey : e.ctrlKey;
+}
+
+function isCodeMirrorEvent(e: KeyboardEvent): boolean {
+  const target = e.target;
+  if (!(target instanceof Element)) return false;
+  return Boolean(target.closest(".cm-editor, .cm-panel"));
 }
 
 export function useEditorShortcuts(): void {
@@ -31,17 +37,19 @@ export function useEditorShortcuts(): void {
         e.preventDefault();
         closeActiveTab();
       } else if (key === "f") {
+        if (isCodeMirrorEvent(e)) return;
         const activeId = useTabStore.getState().activeId;
         const view = activeId ? editorInstances.get(activeId) : undefined;
         if (!view) return;
         e.preventDefault();
         toggleFindPanel(view);
-      } else if (key === "h") {
+      } else if (key === "r") {
+        if (isCodeMirrorEvent(e)) return;
         const activeId = useTabStore.getState().activeId;
         const view = activeId ? editorInstances.get(activeId) : undefined;
         if (!view) return;
         e.preventDefault();
-        openReplacePanel(view);
+        toggleReplacePanel(view);
       } else if (key === ",") {
         e.preventDefault();
         useUiStore.getState().setSettingsOpen(true);

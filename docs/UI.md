@@ -39,7 +39,7 @@
 | 退出 | macOS：Runepad → 退出；其它：文件 → 退出 | — |
 | 编辑 | 编辑 → 撤销/复制等（系统项） | — |
 | 查找 | 编辑 → 查找 | Ctrl/Cmd+F |
-| 替换 | 编辑 → 替换 | Ctrl/Cmd+H |
+| 替换 | 编辑 → 替换 | Ctrl/Cmd+R |
 | 设置 | 标题栏齿轮 / 原生菜单 | — |
 
 无路径保存 → Save Dialog。`isDirty` 关闭须确认 Dialog。错误提示用 **sonner**（shadcn toast）。

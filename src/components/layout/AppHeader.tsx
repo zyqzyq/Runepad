@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useExplorerActions } from "@/hooks/useExplorerActions";
 import { useFileActions } from "@/hooks/useFileActions";
 import { useI18n } from "@/i18n";
-import { openReplacePanel, toggleFindPanel } from "@/lib/editorSearch";
+import { openFindPanel, openReplacePanel } from "@/lib/editorSearch";
 import { cn } from "@/lib/utils";
 import { editorInstances } from "@/lib/editorInstances";
 import { useExplorerStore } from "@/stores/explorerStore";
@@ -94,7 +94,7 @@ function MenuDropdown({
         {label}
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 z-50 mt-1 min-w-48 rounded-md border border-border/70 bg-popover p-1 text-popover-foreground shadow-md">
+        <div className="absolute top-full left-0 z-[1000] mt-1 min-w-48 rounded-md border border-border/70 bg-popover p-1 text-popover-foreground shadow-md">
           {actions.map((action) => (
             <button
               key={action.label}
@@ -151,7 +151,7 @@ export function AppHeader(): JSX.Element {
 
   const openFind = (): void => {
     const view = activeId ? editorInstances.get(activeId) : undefined;
-    if (view) toggleFindPanel(view);
+    if (view) openFindPanel(view);
   };
 
   const openReplace = (): void => {
@@ -209,7 +209,7 @@ export function AppHeader(): JSX.Element {
       },
       {
         label: t("header.replace"),
-        shortcut: "Ctrl+H",
+        shortcut: "Ctrl+R",
         disabled: activeId === null,
         onSelect: openReplace,
       },
@@ -219,7 +219,7 @@ export function AppHeader(): JSX.Element {
   return (
     <header
       ref={headerRef}
-      className="flex h-9 shrink-0 items-center justify-between border-b border-border/50 bg-muted/45"
+      className="relative z-[1000] flex h-9 shrink-0 items-center justify-between border-b border-border/50 bg-muted/45"
     >
       <div className="flex min-w-0 items-center">
         {rootPath !== null && (

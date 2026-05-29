@@ -20,9 +20,9 @@ export const closeFindPanelIfOpen: Command = (view) => {
   return closeSearchPanel(view);
 };
 
-export function openFindPanel(view: EditorView): void {
-  openSearchPanel(view);
-}
+export const openFindPanel: Command = (view) => {
+  return openSearchPanel(view);
+};
 
 export function openReplacePanel(view: EditorView): void {
   if (!searchPanelOpen(view.state)) {
@@ -34,3 +34,11 @@ export function openReplacePanel(view: EditorView): void {
   replaceField?.focus();
   replaceField?.select();
 }
+
+export const toggleReplacePanel: Command = (view) => {
+  if (searchPanelOpen(view.state)) {
+    return closeSearchPanel(view);
+  }
+  openReplacePanel(view);
+  return true;
+};

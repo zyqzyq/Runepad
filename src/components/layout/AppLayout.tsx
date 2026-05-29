@@ -59,7 +59,7 @@ export function AppLayout(): JSX.Element {
         {settingsOpen && <SettingsHost />}
       </Suspense>
       <AppHeader />
-      <div className="flex min-h-0 min-w-0 flex-1">
+      <div className="relative z-0 flex min-h-0 min-w-0 flex-1">
         {rootPath !== null && <Sidebar />}
         <div className="flex min-w-0 flex-1 flex-col">
           <TabBar />

@@ -6,7 +6,7 @@ import {
   toggleComment,
 } from "@codemirror/commands";
 import type { KeyBinding } from "@codemirror/view";
-import { openReplacePanel, toggleFindPanel } from "@/lib/editorSearch";
+import { toggleFindPanel, toggleReplacePanel } from "@/lib/editorSearch";
 
 type NativeEditCommand = "copy" | "cut" | "paste";
 
@@ -27,11 +27,8 @@ const nativeEditKeymap: readonly KeyBinding[] = [
 const searchKeymap: readonly KeyBinding[] = [
   { key: "Mod-f", run: toggleFindPanel },
   {
-    key: "Mod-h",
-    run: (view) => {
-      openReplacePanel(view);
-      return true;
-    },
+    key: "Mod-r",
+    run: toggleReplacePanel,
   },
 ];
 
