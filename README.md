@@ -11,6 +11,10 @@ pnpm tauri dev
 
 生产构建：`pnpm tauri build`
 
+## 截图
+
+![Runepad 主界面](docs/screenshots/runepad-main.png)
+
 ## 文档
 
 | 文档 | 说明 |

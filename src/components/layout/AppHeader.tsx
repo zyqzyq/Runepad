@@ -4,9 +4,10 @@ import {
   PanelLeft,
   Settings,
   Square,
+  SquareStack,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { useExplorerActions } from "@/hooks/useExplorerActions";
 import { useFileActions } from "@/hooks/useFileActions";
@@ -82,6 +83,8 @@ function MenuDropdown({
     <div className="relative">
       <button
         type="button"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
         className={cn(
           "h-8 rounded px-3 text-xs text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
           isOpen && "bg-foreground/5 text-foreground",
@@ -130,6 +133,7 @@ export function AppHeader(): JSX.Element {
   const { t } = useI18n();
   const headerRef = useRef<HTMLElement | null>(null);
   const [activeMenu, setActiveMenu] = useState<AppMenuId | null>(null);
+  const [isMaximized, setIsMaximized] = useState(false);
   const fileActions = useFileActions();
   const explorerActions = useExplorerActions();
   const rootPath = useExplorerStore((s) => s.rootPath);
@@ -148,6 +152,73 @@ export function AppHeader(): JSX.Element {
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, []);
+
+  const refreshMaximizedState = useCallback((): void => {
+    void getCurrentWindow()
+      .isMaximized()
+      .then(setIsMaximized)
+      .catch(() => {
+        // Browser preview cannot access Tauri window APIs.
+      });
+  }, []);
+
+  useEffect(() => {
+    let disposed = false;
+    let unlistenMoved: (() => void) | undefined;
+    let unlistenResized: (() => void) | undefined;
+    const win = getCurrentWindow();
+    const refresh = (): void => {
+      void win
+        .isMaximized()
+        .then((nextMaximized) => {
+          if (!disposed) setIsMaximized(nextMaximized);
+        })
+        .catch(() => {
+          // Browser preview cannot access Tauri window APIs.
+        });
+    };
+
+    refresh();
+    void win
+      .onMoved(refresh)
+      .then((unlisten) => {
+        if (disposed) {
+          unlisten();
+        } else {
+          unlistenMoved = unlisten;
+        }
+      })
+      .catch(() => {
+        // Browser preview cannot access Tauri window APIs.
+      });
+    void win
+      .onResized(refresh)
+      .then((unlisten) => {
+        if (disposed) {
+          unlisten();
+        } else {
+          unlistenResized = unlisten;
+        }
+      })
+      .catch(() => {
+        // Browser preview cannot access Tauri window APIs.
+      });
+
+    return () => {
+      disposed = true;
+      unlistenMoved?.();
+      unlistenResized?.();
+    };
+  }, []);
+
+  const toggleMaximized = useCallback((): void => {
+    void getCurrentWindow()
+      .toggleMaximize()
+      .then(refreshMaximizedState)
+      .catch(() => {
+        // Browser preview cannot access Tauri window APIs.
+      });
+  }, [refreshMaximizedState]);
 
   const openFind = (): void => {
     const view = activeId ? editorInstances.get(activeId) : undefined;
@@ -254,7 +325,11 @@ export function AppHeader(): JSX.Element {
       <div
         className="h-full min-w-8 flex-1"
         onMouseDown={(event) => {
-          if (event.button === 0 && event.detail === 1) {
+          if (event.button !== 0) return;
+
+          if (event.detail === 2) {
+            toggleMaximized();
+          } else if (event.detail === 1) {
             runWindowAction(() => getCurrentWindow().startDragging());
           }
         }}
@@ -274,10 +349,14 @@ export function AppHeader(): JSX.Element {
           <Minus className="h-4 w-4" />
         </HeaderIconButton>
         <HeaderIconButton
-          label={t("header.maximize")}
-          onClick={() => runWindowAction(() => getCurrentWindow().toggleMaximize())}
+          label={isMaximized ? t("header.restore") : t("header.maximize")}
+          onClick={toggleMaximized}
         >
-          <Square className="h-3.5 w-3.5" />
+          {isMaximized ? (
+            <SquareStack className="h-3.5 w-3.5" />
+          ) : (
+            <Square className="h-3.5 w-3.5" />
+          )}
         </HeaderIconButton>
         <HeaderIconButton
           label={t("header.closeWindow")}

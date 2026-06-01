@@ -46,6 +46,7 @@ export type MessageKey =
   | "header.settings"
   | "header.minimize"
   | "header.maximize"
+  | "header.restore"
   | "header.closeWindow"
   | "recent.title"
   | "recent.description.empty"
@@ -128,6 +129,7 @@ const zhCN: Record<MessageKey, string> = {
   "header.settings": "设置",
   "header.minimize": "最小化",
   "header.maximize": "最大化",
+  "header.restore": "还原",
   "header.closeWindow": "关闭窗口",
   "recent.title": "最近打开",
   "recent.description.empty": "暂无最近文件。打开或保存文件后会出现在这里。",
@@ -212,6 +214,7 @@ const enUS: Record<MessageKey, string> = {
   "header.settings": "Settings",
   "header.minimize": "Minimize",
   "header.maximize": "Maximize",
+  "header.restore": "Restore",
   "header.closeWindow": "Close window",
   "recent.title": "Recent files",
   "recent.description.empty":

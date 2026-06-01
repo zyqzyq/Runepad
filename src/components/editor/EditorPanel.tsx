@@ -14,7 +14,11 @@ import {
   lineNumbers,
 } from "@codemirror/view";
 import { useEffect, useRef } from "react";
-import { getCodemirrorTheme, getEditorFontTheme } from "@/lib/codemirrorTheme";
+import {
+  getCodemirrorTheme,
+  getEditorFontTheme,
+  getLanguagePresentationTheme,
+} from "@/lib/codemirrorTheme";
 import { getEditorSyntaxThemeExtension } from "@/lib/codemirrorSyntaxThemes";
 import { loadLanguageExtension } from "@/lib/codemirrorLanguages";
 import { editorKeymap } from "@/lib/editorKeymap";
@@ -57,6 +61,7 @@ export function EditorPanel({
   const fontCompartment = useRef(new Compartment()).current;
   const syntaxThemeCompartment = useRef(new Compartment()).current;
   const languageCompartment = useRef(new Compartment()).current;
+  const languagePresentationCompartment = useRef(new Compartment()).current;
   const resolvedTheme = useUiStore((s) => s.resolvedTheme);
   const editorFontFamily = useSettingsStore((s) => s.editorFontFamily);
   const editorFontSize = useSettingsStore((s) => s.editorFontSize);
@@ -126,6 +131,7 @@ export function EditorPanel({
           ),
         ),
         languageCompartment.of([]),
+        languagePresentationCompartment.of(getLanguagePresentationTheme(language)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             markDirty(docId, true);
@@ -153,6 +159,7 @@ export function EditorPanel({
     fontCompartment,
     isActive,
     languageCompartment,
+    languagePresentationCompartment,
     markDirty,
     setMeta,
     syntaxThemeCompartment,
@@ -191,6 +198,12 @@ export function EditorPanel({
     const view = editorInstances.get(docId);
     if (!view) return;
 
+    view.dispatch({
+      effects: languagePresentationCompartment.reconfigure(
+        getLanguagePresentationTheme(language),
+      ),
+    });
+
     let cancelled = false;
     void loadLanguageExtension(language).then((ext) => {
       if (cancelled) return;
@@ -202,7 +215,7 @@ export function EditorPanel({
     return () => {
       cancelled = true;
     };
-  }, [docId, language, languageCompartment]);
+  }, [docId, language, languageCompartment, languagePresentationCompartment]);
 
   useEffect(() => {
     if (!isActive) return;

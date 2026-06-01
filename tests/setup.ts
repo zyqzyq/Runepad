@@ -14,13 +14,18 @@ vi.mock("@tauri-apps/plugin-dialog", () => ({
   save: vi.fn(),
 }));
 
+const mockCurrentWindow = {
+  startDragging: vi.fn(async () => undefined),
+  minimize: vi.fn(async () => undefined),
+  toggleMaximize: vi.fn(async () => undefined),
+  close: vi.fn(async () => undefined),
+  isMaximized: vi.fn(async () => false),
+  onMoved: vi.fn(async () => vi.fn()),
+  onResized: vi.fn(async () => vi.fn()),
+};
+
 vi.mock("@tauri-apps/api/window", () => ({
-  getCurrentWindow: () => ({
-    startDragging: vi.fn(async () => undefined),
-    minimize: vi.fn(async () => undefined),
-    toggleMaximize: vi.fn(async () => undefined),
-    close: vi.fn(async () => undefined),
-  }),
+  getCurrentWindow: () => mockCurrentWindow,
 }));
 
 Object.defineProperty(window, "matchMedia", {

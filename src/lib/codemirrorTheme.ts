@@ -44,6 +44,9 @@ function buildEditorTheme(vars: EditorCssVars, dark: boolean): Extension {
         borderColor: vars.gutterFg,
         color: vars.foreground,
       },
+      ".cm-activeLine": {
+        backgroundColor: "color-mix(in oklch, var(--accent) 54%, transparent)",
+      },
     },
     { dark },
   );
@@ -68,4 +71,34 @@ export function getEditorFontTheme(
       fontSize: `${sizePx}px`,
     },
   });
+}
+
+export function getLanguagePresentationTheme(language: string): Extension[] {
+  if (language !== "markdown") return [];
+
+  return [
+    EditorView.theme({
+      ".cm-content": {
+        lineHeight: "1.65",
+        paddingTop: "14px",
+        paddingBottom: "18px",
+      },
+      ".cm-line": {
+        paddingLeft: "18px",
+        paddingRight: "22px",
+      },
+      ".cm-gutters": {
+        paddingTop: "14px",
+      },
+      ".cm-line span": {
+        textUnderlineOffset: "3px",
+      },
+      ".cm-content span[class]": {
+        textDecorationThickness: "1px",
+      },
+      ".cm-content .cm-line span[class]": {
+        borderRadius: "3px",
+      },
+    }),
+  ];
 }
