@@ -129,11 +129,16 @@ function runWindowAction(action: () => Promise<void>): void {
   });
 }
 
+function isMacPlatform(): boolean {
+  return navigator.platform.toUpperCase().includes("MAC");
+}
+
 export function AppHeader(): JSX.Element {
   const { t } = useI18n();
   const headerRef = useRef<HTMLElement | null>(null);
   const [activeMenu, setActiveMenu] = useState<AppMenuId | null>(null);
   const [isMaximized, setIsMaximized] = useState(false);
+  const isMac = isMacPlatform();
   const fileActions = useFileActions();
   const explorerActions = useExplorerActions();
   const rootPath = useExplorerStore((s) => s.rootPath);
@@ -292,7 +297,7 @@ export function AppHeader(): JSX.Element {
       ref={headerRef}
       className="relative z-[1000] flex h-9 shrink-0 items-center justify-between border-b border-border/50 bg-muted/45"
     >
-      <div className="flex min-w-0 items-center">
+      <div className={cn("flex min-w-0 items-center", isMac && "pl-[76px]")}>
         {rootPath !== null && (
           <HeaderIconButton
             label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
@@ -342,29 +347,33 @@ export function AppHeader(): JSX.Element {
         >
           <Settings className="h-4 w-4" />
         </HeaderIconButton>
-        <HeaderIconButton
-          label={t("header.minimize")}
-          onClick={() => runWindowAction(() => getCurrentWindow().minimize())}
-        >
-          <Minus className="h-4 w-4" />
-        </HeaderIconButton>
-        <HeaderIconButton
-          label={isMaximized ? t("header.restore") : t("header.maximize")}
-          onClick={toggleMaximized}
-        >
-          {isMaximized ? (
-            <SquareStack className="h-3.5 w-3.5" />
-          ) : (
-            <Square className="h-3.5 w-3.5" />
-          )}
-        </HeaderIconButton>
-        <HeaderIconButton
-          label={t("header.closeWindow")}
-          className="hover:bg-destructive hover:text-white"
-          onClick={() => runWindowAction(() => getCurrentWindow().close())}
-        >
-          <X className="h-4 w-4" />
-        </HeaderIconButton>
+        {!isMac && (
+          <>
+            <HeaderIconButton
+              label={t("header.minimize")}
+              onClick={() => runWindowAction(() => getCurrentWindow().minimize())}
+            >
+              <Minus className="h-4 w-4" />
+            </HeaderIconButton>
+            <HeaderIconButton
+              label={isMaximized ? t("header.restore") : t("header.maximize")}
+              onClick={toggleMaximized}
+            >
+              {isMaximized ? (
+                <SquareStack className="h-3.5 w-3.5" />
+              ) : (
+                <Square className="h-3.5 w-3.5" />
+              )}
+            </HeaderIconButton>
+            <HeaderIconButton
+              label={t("header.closeWindow")}
+              className="hover:bg-destructive hover:text-white"
+              onClick={() => runWindowAction(() => getCurrentWindow().close())}
+            >
+              <X className="h-4 w-4" />
+            </HeaderIconButton>
+          </>
+        )}
       </div>
     </header>
   );

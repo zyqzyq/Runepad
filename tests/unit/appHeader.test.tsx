@@ -15,8 +15,14 @@ function currentWindowMock(): WindowMock {
 }
 
 describe("AppHeader", () => {
+  const originalPlatform = navigator.platform;
+
   beforeEach(() => {
     resetStores([]);
+    Object.defineProperty(navigator, "platform", {
+      configurable: true,
+      value: originalPlatform,
+    });
     currentWindowMock().isMaximized.mockResolvedValue(false);
     currentWindowMock().toggleMaximize.mockResolvedValue(undefined);
   });
@@ -53,5 +59,25 @@ describe("AppHeader", () => {
     await userEvent.click(fileMenu);
 
     expect(fileMenu).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("uses native macOS window controls instead of custom window buttons", () => {
+    Object.defineProperty(navigator, "platform", {
+      configurable: true,
+      value: "MacIntel",
+    });
+
+    render(<AppHeader />);
+
+    expect(screen.getByRole("button", { name: "File" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Minimize" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Maximize" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Close window" }),
+    ).not.toBeInTheDocument();
   });
 });
