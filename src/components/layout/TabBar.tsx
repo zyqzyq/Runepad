@@ -194,7 +194,7 @@ export function TabBar(): JSX.Element {
   };
 
   return (
-    <div className="flex h-8 shrink-0 bg-muted/35">
+    <div className="flex h-8 shrink-0 bg-background">
       {canScrollLeft && (
         <button
           type="button"
@@ -229,7 +229,7 @@ export function TabBar(): JSX.Element {
                 "group flex max-w-[200px] shrink-0 cursor-grab items-center gap-1.5 px-3 text-xs select-none touch-none active:cursor-grabbing",
                 isActive
                   ? "border-b-2 border-primary bg-background text-foreground shadow-[inset_0_1px_0_var(--background)]"
-                  : "border-b-2 border-transparent text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground",
+                  : "border-b-2 border-transparent text-muted-foreground hover:bg-accent/55 hover:text-accent-foreground",
                 isDragging && isDraggingActive && "opacity-50",
                 isDropTarget && "bg-accent",
               )}

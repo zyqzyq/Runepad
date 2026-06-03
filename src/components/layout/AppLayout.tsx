@@ -61,7 +61,7 @@ export function AppLayout(): JSX.Element {
       <AppHeader />
       <div className="relative z-0 flex min-h-0 min-w-0 flex-1 bg-muted/80">
         {rootPath !== null && <Sidebar />}
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-tl-xl bg-background shadow-[0_1px_3px_color-mix(in_oklch,var(--foreground)_7%,transparent)]">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-tl-xl bg-background ring-1 ring-foreground/8 shadow-[0_1px_2px_color-mix(in_oklch,var(--foreground)_12%,transparent)] dark:ring-foreground/10">
           <TabBar />
           <EditorArea />
           <StatusBar />
