@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useFileActions } from "@/hooks/useFileActions";
+import { useExplorerActions } from "@/hooks/useExplorerActions";
 import { editorInstances } from "@/lib/editorInstances";
 import { toggleFindPanel, toggleReplacePanel } from "@/lib/editorSearch";
 import { useTabStore } from "@/stores/tabStore";
@@ -18,6 +19,7 @@ function isCodeMirrorEvent(e: KeyboardEvent): boolean {
 
 export function useEditorShortcuts(): void {
   const { newFile, openFile, saveFile, closeActiveTab } = useFileActions();
+  const { openFolder } = useExplorerActions();
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent): void => {
@@ -29,7 +31,11 @@ export function useEditorShortcuts(): void {
         newFile();
       } else if (key === "o") {
         e.preventDefault();
-        void openFile();
+        if (e.shiftKey) {
+          void openFolder();
+        } else {
+          void openFile();
+        }
       } else if (key === "s") {
         e.preventDefault();
         void saveFile();
@@ -58,5 +64,5 @@ export function useEditorShortcuts(): void {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [closeActiveTab, newFile, openFile, saveFile]);
+  }, [closeActiveTab, newFile, openFile, openFolder, saveFile]);
 }

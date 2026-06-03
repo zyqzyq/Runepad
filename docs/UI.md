@@ -44,8 +44,6 @@
 
 无路径保存 → Save Dialog。`isDirty` 关闭须确认 Dialog。错误提示用 **sonner**（shadcn toast）。
 
-Command Palette（Ctrl/Cmd+Shift+P）属 **P3+**（未实现）。
-
 ## 原生菜单实现要点
 
 - 定义于 `src-tauri/src/menu.rs`（`MenuBuilder` / `SubmenuBuilder`）

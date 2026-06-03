@@ -12,13 +12,23 @@ const editorSearch = vi.hoisted(() => ({
   toggleReplacePanel: vi.fn(),
 }));
 
+const fileActions = vi.hoisted(() => ({
+  newFile: vi.fn(),
+  openFile: vi.fn(),
+  saveFile: vi.fn(),
+  closeActiveTab: vi.fn(),
+}));
+
+const explorerActions = vi.hoisted(() => ({
+  openFolder: vi.fn(),
+}));
+
 vi.mock("@/hooks/useFileActions", () => ({
-  useFileActions: () => ({
-    newFile: vi.fn(),
-    openFile: vi.fn(),
-    saveFile: vi.fn(),
-    closeActiveTab: vi.fn(),
-  }),
+  useFileActions: () => fileActions,
+}));
+
+vi.mock("@/hooks/useExplorerActions", () => ({
+  useExplorerActions: () => explorerActions,
 }));
 
 vi.mock("@/lib/editorSearch", () => ({
@@ -37,12 +47,17 @@ function dispatchCtrlF(target: EventTarget): KeyboardEvent {
   return dispatchModKey(target, "f");
 }
 
-function dispatchModKey(target: EventTarget, key: string): KeyboardEvent {
+function dispatchModKey(
+  target: EventTarget,
+  key: string,
+  options: { shiftKey?: boolean } = {},
+): KeyboardEvent {
   const event = new KeyboardEvent("keydown", {
     bubbles: true,
     cancelable: true,
     ctrlKey: true,
     key,
+    shiftKey: options.shiftKey ?? false,
   });
   target.dispatchEvent(event);
   return event;
@@ -51,10 +66,35 @@ function dispatchModKey(target: EventTarget, key: string): KeyboardEvent {
 describe("useEditorShortcuts", () => {
   afterEach(() => {
     editorInstances.clear();
+    fileActions.newFile.mockReset();
+    fileActions.openFile.mockReset();
+    fileActions.saveFile.mockReset();
+    fileActions.closeActiveTab.mockReset();
+    explorerActions.openFolder.mockReset();
     editorSearch.toggleFindPanel.mockReset();
     editorSearch.openFindPanel.mockReset();
     editorSearch.openReplacePanel.mockReset();
     editorSearch.toggleReplacePanel.mockReset();
+  });
+
+  test("opens files with Ctrl+O", () => {
+    render(<ShortcutHost />);
+
+    const event = dispatchModKey(window, "o");
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(fileActions.openFile).toHaveBeenCalledTimes(1);
+    expect(explorerActions.openFolder).not.toHaveBeenCalled();
+  });
+
+  test("opens folders with Ctrl+Shift+O", () => {
+    render(<ShortcutHost />);
+
+    const event = dispatchModKey(window, "o", { shiftKey: true });
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(explorerActions.openFolder).toHaveBeenCalledTimes(1);
+    expect(fileActions.openFile).not.toHaveBeenCalled();
   });
 
   test("lets CodeMirror handle Ctrl+F events that originate in the editor", () => {

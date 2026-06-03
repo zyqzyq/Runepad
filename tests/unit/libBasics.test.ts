@@ -28,5 +28,6 @@ describe("path and filename helpers", () => {
     });
 
     expect(displayPath("C:/Work/a.txt")).toBe("C:\\Work\\a.txt");
+    expect(displayPath("\\\\?\\C:\\Work\\a.txt")).toBe("C:\\Work\\a.txt");
   });
 });
