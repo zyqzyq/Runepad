@@ -20,8 +20,8 @@ export function FileTreeNode({
       type="button"
       className={cn(
         "flex h-7 w-full items-center gap-1 rounded-sm px-2 text-left text-xs",
-        "text-sidebar-foreground hover:bg-sidebar-accent",
-        isActiveFile && "bg-sidebar-accent font-medium",
+        "text-sidebar-foreground hover:bg-background/55 hover:text-sidebar-accent-foreground",
+        isActiveFile && "bg-background/70 font-medium text-sidebar-accent-foreground",
       )}
       style={{ paddingLeft: `${8 + row.depth * 12}px` }}
       onClick={onClick}

@@ -59,9 +59,9 @@ export function AppLayout(): JSX.Element {
         {settingsOpen && <SettingsHost />}
       </Suspense>
       <AppHeader />
-      <div className="relative z-0 flex min-h-0 min-w-0 flex-1">
+      <div className="relative z-0 flex min-h-0 min-w-0 flex-1 bg-muted/80">
         {rootPath !== null && <Sidebar />}
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-tl-xl bg-background shadow-[0_1px_3px_color-mix(in_oklch,var(--foreground)_7%,transparent)]">
           <TabBar />
           <EditorArea />
           <StatusBar />

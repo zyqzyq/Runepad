@@ -9,6 +9,9 @@ interface EditorCssVars {
   foreground: string;
   gutterBg: string;
   gutterFg: string;
+  border: string;
+  accent: string;
+  ring: string;
 }
 
 function readEditorCssVars(): EditorCssVars {
@@ -18,6 +21,9 @@ function readEditorCssVars(): EditorCssVars {
     foreground: style.getPropertyValue("--editor-foreground").trim() || "#1e1e1e",
     gutterBg: style.getPropertyValue("--editor-gutter-bg").trim() || "#f5f5f5",
     gutterFg: style.getPropertyValue("--editor-gutter-fg").trim() || "#6e6e6e",
+    border: style.getPropertyValue("--border").trim() || "#e5e5e5",
+    accent: style.getPropertyValue("--accent").trim() || "#f4f4f5",
+    ring: style.getPropertyValue("--ring").trim() || "#8a8a8a",
   };
 }
 
@@ -29,23 +35,62 @@ function buildEditorTheme(vars: EditorCssVars, dark: boolean): Extension {
         color: vars.foreground,
         height: "100%",
       },
-      ".cm-content": { caretColor: vars.foreground },
+      ".cm-content": {
+        caretColor: vars.foreground,
+        paddingTop: "10px",
+        paddingBottom: "14px",
+      },
+      ".cm-line": {
+        paddingLeft: "12px",
+        paddingRight: "18px",
+      },
+      ".cm-cursor": {
+        borderLeftColor: vars.foreground,
+      },
+      ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
+        backgroundColor:
+          "color-mix(in oklch, var(--ring) 22%, transparent)",
+      },
       ".cm-gutters": {
         backgroundColor: vars.gutterBg,
         color: vars.gutterFg,
-        border: "none",
+        borderRight: `1px solid ${vars.border}`,
+      },
+      ".cm-lineNumbers .cm-gutterElement": {
+        paddingLeft: "12px",
+        paddingRight: "10px",
       },
       ".cm-foldGutter span": {
         color: vars.gutterFg,
         cursor: "pointer",
       },
       ".cm-foldPlaceholder": {
-        backgroundColor: vars.gutterBg,
-        borderColor: vars.gutterFg,
+        backgroundColor: vars.accent,
+        borderColor: vars.border,
         color: vars.foreground,
       },
       ".cm-activeLine": {
-        backgroundColor: "color-mix(in oklch, var(--accent) 54%, transparent)",
+        backgroundColor:
+          "color-mix(in oklch, var(--accent) 58%, transparent)",
+      },
+      ".cm-activeLineGutter": {
+        backgroundColor:
+          "color-mix(in oklch, var(--accent) 76%, transparent)",
+        color: vars.foreground,
+      },
+      ".cm-matchingBracket, .cm-nonmatchingBracket": {
+        backgroundColor:
+          "color-mix(in oklch, var(--ring) 16%, transparent)",
+        outline: `1px solid ${vars.border}`,
+      },
+      ".cm-searchMatch": {
+        backgroundColor:
+          "color-mix(in oklch, var(--ring) 20%, transparent)",
+        outline: `1px solid color-mix(in oklch, ${vars.ring} 34%, transparent)`,
+      },
+      ".cm-searchMatch-selected": {
+        backgroundColor:
+          "color-mix(in oklch, var(--ring) 32%, transparent)",
       },
     },
     { dark },

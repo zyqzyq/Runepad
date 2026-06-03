@@ -46,7 +46,7 @@ export function EditorArea(): JSX.Element {
   return (
     <div
       data-editor-area
-      className="relative min-h-0 flex-1 bg-[var(--editor-background)]"
+      className="relative min-h-0 flex-1 overflow-hidden bg-[var(--editor-background)]"
     >
       <Suspense fallback={<EditorAreaFallback />}>
         {activeTab ? (

@@ -53,7 +53,7 @@ function HeaderIconButton({
       aria-label={label}
       onClick={onClick}
       className={cn(
-        "size-8 rounded-none text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
+        "size-8 rounded-none text-muted-foreground hover:bg-accent hover:text-accent-foreground",
         className,
       )}
     >
@@ -86,8 +86,8 @@ function MenuDropdown({
         aria-haspopup="menu"
         aria-expanded={isOpen}
         className={cn(
-          "h-8 rounded px-3 text-xs text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
-          isOpen && "bg-foreground/5 text-foreground",
+          "h-8 rounded px-3 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+          isOpen && "bg-accent text-accent-foreground",
         )}
         onClick={() => (isOpen ? onClose() : onOpen(menuId))}
         onMouseEnter={() => {
@@ -97,13 +97,13 @@ function MenuDropdown({
         {label}
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 z-[1000] mt-1 min-w-48 rounded-md border border-border/70 bg-popover p-1 text-popover-foreground shadow-md">
+        <div className="absolute top-full left-0 z-[1000] mt-1 min-w-48 rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg shadow-foreground/5">
           {actions.map((action) => (
             <button
               key={action.label}
               type="button"
               disabled={action.disabled}
-              className="flex h-8 w-full items-center justify-between gap-6 rounded px-2 text-left text-xs hover:bg-muted disabled:pointer-events-none disabled:opacity-45"
+              className="flex h-8 w-full items-center justify-between gap-6 rounded px-2 text-left text-xs hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-45"
               onClick={() => {
                 action.onSelect();
                 onClose();
@@ -295,7 +295,7 @@ export function AppHeader(): JSX.Element {
   return (
     <header
       ref={headerRef}
-      className="relative z-[1000] flex h-9 shrink-0 items-center justify-between border-b border-border/50 bg-muted/45"
+      className="relative z-[1000] flex h-9 shrink-0 items-center justify-between bg-muted/70"
     >
       <div className={cn("flex min-w-0 items-center", isMac && "pl-[76px]")}>
         {rootPath !== null && (

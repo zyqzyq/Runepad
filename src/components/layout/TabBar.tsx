@@ -194,11 +194,11 @@ export function TabBar(): JSX.Element {
   };
 
   return (
-    <div className="flex h-8 shrink-0 border-b border-border/50 bg-background">
+    <div className="flex h-8 shrink-0 bg-muted/35">
       {canScrollLeft && (
         <button
           type="button"
-          className="flex w-7 shrink-0 items-center justify-center border-r border-border/40 text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+          className="flex w-7 shrink-0 items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           onClick={() => scrollTabs(-1)}
           aria-label={t("tab.scrollLeft")}
         >
@@ -228,10 +228,10 @@ export function TabBar(): JSX.Element {
               className={cn(
                 "group flex max-w-[200px] shrink-0 cursor-grab items-center gap-1.5 px-3 text-xs select-none touch-none active:cursor-grabbing",
                 isActive
-                  ? "border-b-2 border-primary bg-muted/50 text-foreground"
-                  : "border-b-2 border-transparent text-muted-foreground hover:bg-muted/30",
+                  ? "border-b-2 border-primary bg-background text-foreground shadow-[inset_0_1px_0_var(--background)]"
+                  : "border-b-2 border-transparent text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground",
                 isDragging && isDraggingActive && "opacity-50",
-                isDropTarget && "bg-muted/40",
+                isDropTarget && "bg-accent",
               )}
               onClick={() => handleTabClick(tab.id)}
               onPointerDown={(e) => handleTabPointerDown(index, e)}
@@ -253,7 +253,7 @@ export function TabBar(): JSX.Element {
                 type="button"
                 data-tab-close
                 className={cn(
-                  "shrink-0 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground",
+                  "shrink-0 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                   isActive ? "opacity-70" : "opacity-0 group-hover:opacity-70",
                 )}
                 onClick={(e) => handleClose(tab.id, e)}
@@ -269,7 +269,7 @@ export function TabBar(): JSX.Element {
       {canScrollRight && (
         <button
           type="button"
-          className="flex w-7 shrink-0 items-center justify-center border-l border-border/40 text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+          className="flex w-7 shrink-0 items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           onClick={() => scrollTabs(1)}
           aria-label={t("tab.scrollRight")}
         >

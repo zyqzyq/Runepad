@@ -44,10 +44,10 @@ export function Sidebar(): JSX.Element | null {
 
   return (
     <aside
-      className="relative flex h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground"
+      className="relative flex h-full shrink-0 flex-col overflow-hidden bg-muted/70 text-sidebar-foreground"
       style={{ width: `${sidebarWidth}px` }}
     >
-      <div className="flex h-8 shrink-0 items-center border-b border-sidebar-border px-2">
+      <div className="flex h-8 shrink-0 items-center px-2">
         <span
           className="truncate text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
           title={rootPath ?? undefined}
@@ -59,7 +59,7 @@ export function Sidebar(): JSX.Element | null {
       <div
         role="separator"
         aria-orientation="vertical"
-        className="absolute top-0 right-[-3px] z-20 h-full w-1.5 cursor-col-resize bg-transparent transition-colors hover:bg-ring/35"
+        className="absolute top-0 right-[-6px] z-20 h-full w-3 cursor-col-resize bg-transparent transition-colors hover:bg-sidebar-ring/25"
         onPointerDown={startResize}
       />
     </aside>
