@@ -13,7 +13,7 @@
   <Identity
     Name="zyqzyq.Runepad"
     Publisher="__PUBLISHER__"
-    Version="0.6.2.0"
+    Version="0.6.3.0"
     ProcessorArchitecture="__PROCESSOR_ARCHITECTURE__" />
   <Properties>
     <DisplayName>Runepad</DisplayName>

@@ -4,7 +4,7 @@ import {
   PanelLeft,
   Settings,
   Square,
-  SquareStack,
+  Copy,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
@@ -360,7 +360,7 @@ export function AppHeader(): JSX.Element {
               onClick={toggleMaximized}
             >
               {isMaximized ? (
-                <SquareStack className="h-3.5 w-3.5" />
+                <Copy className="h-3.5 w-3.5 scale-x-[-1]" />
               ) : (
                 <Square className="h-3.5 w-3.5" />
               )}
