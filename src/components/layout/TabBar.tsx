@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { useCloseTab } from "@/hooks/useCloseTab";
@@ -28,7 +35,7 @@ export function TabBar(): JSX.Element {
   const activeId = useTabStore((s) => s.activeId);
   const setActiveTab = useTabStore((s) => s.setActiveTab);
   const reorderTabs = useTabStore((s) => s.reorderTabs);
-  const { requestCloseTab } = useCloseTab();
+  const { requestCloseTab, requestCloseTabs } = useCloseTab();
   const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [isDraggingActive, setIsDraggingActive] = useState(false);
@@ -193,6 +200,10 @@ export function TabBar(): JSX.Element {
     });
   };
 
+  const closeTabsByIds = (ids: string[]): void => {
+    requestCloseTabs(ids);
+  };
+
   return (
     <div className="flex h-8 shrink-0 bg-background">
       {canScrollLeft && (
@@ -208,7 +219,7 @@ export function TabBar(): JSX.Element {
       <div
         ref={tabBarRef}
         data-tab-bar
-        className="flex min-w-0 flex-1 items-stretch overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex min-w-0 flex-1 scroll-px-2 items-stretch overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {tabs.map((tab, index) => {
           const isActive = tab.id === activeId;
@@ -217,52 +228,77 @@ export function TabBar(): JSX.Element {
             dropIndex === index &&
             dragFromIndex !== null &&
             dragFromIndex !== index;
+          const leftTabIds = tabs.slice(0, index).map((item) => item.id);
+          const rightTabIds = tabs.slice(index + 1).map((item) => item.id);
+          const allTabIds = tabs.map((item) => item.id);
           return (
-            <div
-              key={tab.id}
-              data-tab-index={index}
-              data-active-tab={isActive}
-              role="tab"
-              tabIndex={0}
-              aria-selected={isActive}
-              className={cn(
-                "group flex max-w-[200px] shrink-0 cursor-grab items-center gap-1.5 px-3 text-xs select-none touch-none active:cursor-grabbing",
-                isActive
-                  ? "border-b-2 border-primary bg-background text-foreground shadow-[inset_0_1px_0_var(--background)]"
-                  : "border-b-2 border-transparent text-muted-foreground hover:bg-accent/55 hover:text-accent-foreground",
-                isDragging && isDraggingActive && "opacity-50",
-                isDropTarget && "bg-accent",
-              )}
-              onClick={() => handleTabClick(tab.id)}
-              onPointerDown={(e) => handleTabPointerDown(index, e)}
-              onMouseUp={(e) => handleMiddleClick(tab.id, e)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setActiveTab(tab.id);
-                }
-              }}
-            >
-              {tab.isDirty && (
-                <span
-                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 dark:bg-amber-400"
-                  title={t("tab.unsaved")}
-                />
-              )}
-              <span className="min-w-0 flex-1 truncate">{tab.filename}</span>
-              <button
-                type="button"
-                data-tab-close
+            <ContextMenu key={tab.id}>
+              <ContextMenuTrigger
+                data-tab-index={index}
+                data-active-tab={isActive}
+                role="tab"
+                tabIndex={0}
+                aria-selected={isActive}
                 className={cn(
-                  "shrink-0 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                  isActive ? "opacity-70" : "opacity-0 group-hover:opacity-70",
+                  "group flex max-w-[200px] shrink-0 scroll-mx-2 cursor-grab items-center gap-1.5 px-3 text-xs select-none touch-none active:cursor-grabbing",
+                  isActive
+                    ? "border-b-2 border-primary bg-background text-foreground shadow-[inset_0_1px_0_var(--background)]"
+                    : "border-b-2 border-transparent text-muted-foreground hover:bg-accent/55 hover:text-accent-foreground",
+                  isDragging && isDraggingActive && "opacity-50",
+                  isDropTarget && "bg-accent",
                 )}
-                onClick={(e) => handleClose(tab.id, e)}
-                onPointerDown={(e) => e.stopPropagation()}
-                aria-label={t("tab.close", { filename: tab.filename })}
+                onClick={() => handleTabClick(tab.id)}
+                onPointerDown={(e) => handleTabPointerDown(index, e)}
+                onMouseUp={(e) => handleMiddleClick(tab.id, e)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setActiveTab(tab.id);
+                  }
+                }}
               >
-                <X className="h-3 w-3" />
-              </button>
-            </div>
+                {tab.isDirty && (
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 dark:bg-amber-400"
+                    title={t("tab.unsaved")}
+                  />
+                )}
+                <span className="min-w-0 flex-1 truncate">{tab.filename}</span>
+                <button
+                  type="button"
+                  data-tab-close
+                  className={cn(
+                    "shrink-0 cursor-pointer rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    isActive ? "opacity-70" : "opacity-0 group-hover:opacity-70",
+                  )}
+                  onClick={(e) => handleClose(tab.id, e)}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  aria-label={t("tab.close", { filename: tab.filename })}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="min-w-44">
+                <ContextMenuItem onClick={() => requestCloseTab(tab.id)}>
+                  {t("tab.closeCurrent")}
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+                <ContextMenuItem
+                  disabled={leftTabIds.length === 0}
+                  onClick={() => closeTabsByIds(leftTabIds)}
+                >
+                  {t("tab.closeLeft")}
+                </ContextMenuItem>
+                <ContextMenuItem
+                  disabled={rightTabIds.length === 0}
+                  onClick={() => closeTabsByIds(rightTabIds)}
+                >
+                  {t("tab.closeRight")}
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => closeTabsByIds(allTabIds)}>
+                  {t("tab.closeAll")}
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           );
         })}
       </div>

@@ -70,6 +70,10 @@ export type MessageKey =
   | "tab.unsaved"
   | "tab.dragReorder"
   | "tab.close"
+  | "tab.closeCurrent"
+  | "tab.closeLeft"
+  | "tab.closeRight"
+  | "tab.closeAll"
   | "tab.scrollLeft"
   | "tab.scrollRight"
   | "status.lineCol"
@@ -154,6 +158,10 @@ const zhCN: Record<MessageKey, string> = {
   "tab.unsaved": "有未保存的更改",
   "tab.dragReorder": "拖动以重新排序 {filename}",
   "tab.close": "关闭 {filename}",
+  "tab.closeCurrent": "关闭当前",
+  "tab.closeLeft": "关闭左侧所有",
+  "tab.closeRight": "关闭右侧所有",
+  "tab.closeAll": "关闭所有",
   "tab.scrollLeft": "向左滚动标签",
   "tab.scrollRight": "向右滚动标签",
   "status.lineCol": "行 {line}，列 {col}",
@@ -241,6 +249,10 @@ const enUS: Record<MessageKey, string> = {
   "tab.unsaved": "Unsaved changes",
   "tab.dragReorder": "Drag to reorder {filename}",
   "tab.close": "Close {filename}",
+  "tab.closeCurrent": "Close current",
+  "tab.closeLeft": "Close tabs to the left",
+  "tab.closeRight": "Close tabs to the right",
+  "tab.closeAll": "Close all tabs",
   "tab.scrollLeft": "Scroll tabs left",
   "tab.scrollRight": "Scroll tabs right",
   "status.lineCol": "Ln {line}, Col {col}",

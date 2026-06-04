@@ -18,11 +18,10 @@ import { useTabStore } from "@/stores/tabStore";
 
 export function CloseTabHost(): JSX.Element {
   const pendingTabId = useCloseTabStore((s) => s.pendingTabId);
-  const setPendingTabId = useCloseTabStore((s) => s.setPendingTabId);
   const tabs = useTabStore((s) => s.tabs);
   const locale = useSettingsStore((s) => s.locale);
   const { t } = useI18n();
-  const { forceCloseTab } = useCloseTab();
+  const { cancelCloseTabs, forceCloseTab } = useCloseTab();
   const { saveTabById } = useFileActions();
 
   const tab = pendingTabId
@@ -31,8 +30,8 @@ export function CloseTabHost(): JSX.Element {
   const open = pendingTabId !== null && tab !== undefined;
 
   const handleCancel = useCallback(() => {
-    setPendingTabId(null);
-  }, [setPendingTabId]);
+    cancelCloseTabs();
+  }, [cancelCloseTabs]);
 
   const handleDiscard = useCallback(() => {
     if (!pendingTabId) return;

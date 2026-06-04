@@ -41,7 +41,7 @@ export function resetStores(tabs: Tab[] = [makeTab({ id: "tab-1" })]): void {
   useRecentFilesStore.setState({ paths: [] });
   useSettingsStore.setState(DEFAULT_SETTINGS);
   useEditorStore.setState({ metaByDocId: {} });
-  useCloseTabStore.setState({ pendingTabId: null });
+  useCloseTabStore.setState({ pendingTabId: null, pendingTabIds: [] });
   useFileChangeStore.setState({ pendingTabIds: [] });
   editorInstances.clear();
   pendingInitialDocs.clear();
