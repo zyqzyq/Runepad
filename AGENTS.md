@@ -37,7 +37,7 @@
 | 项 | 值 |
 |----|-----|
 | **项目** | Runepad — 轻量级桌面文本编辑器（Notepad++ 现代替代品） |
-| **阶段** | P0/P1/P2 完成；P3+ 部分（会话恢复、目录监听已落地） |
+| **阶段** | P0/P1/P2/P3+ 完成 |
 | **前端** | React 18 + Vite 6 + Tailwind v4 + shadcn/ui v4 (Base UI) + CodeMirror 6 |
 | **后端** | Tauri v2 + Rust + tokio + notify + encoding_rs |
 | **状态** | Zustand v5（tab/editor/ui/settings/explorer/recent/closeTab） |
@@ -52,9 +52,9 @@
 | P0 可编辑可存盘 | 完成 | 菜单、Tab、StatusBar、主题 |
 | P1 像编辑器 | 完成 | 文件树、脏关闭、语法高亮 |
 | P2 效率 | 完成 | 查找替换、最近文件、拖拽排序、GBK/UTF-8 读写 |
-| P3+ 进阶 | 部分 | 会话恢复、watch 已做；>10MB 分片/只读未做 |
+| P3+ 进阶 | 完成 | 会话恢复、watch 已做 |
 
-**禁止**跨阶段一次性实现未列入当前阶段的特性。v1 不做：N++ 插件、宏、FTP、打印、内置浏览器、分屏。
+**禁止**跨阶段一次性实现未列入当前阶段的特性。v1 不做：N++ 插件、宏、FTP、打印、内置浏览器、分屏、>10MB 文件分片/只读。
 
 ---
 
@@ -141,7 +141,7 @@
 
 ## 性能与安全
 
-**大文件**：<1MB 正常+高亮；1–10MB 关闭高亮+警告；>10MB 当前拒绝（P3+ 分片/只读未做）。
+**大文件**：<1MB 正常+高亮；1–10MB 关闭高亮+警告；>10MB 直接拒绝。
 
 **内存**：关 Tab 必 destroy EditorView；Rust 句柄及时释放。
 
@@ -158,7 +158,6 @@
 1. Windows 构建后 `.exe` 图标可能仍旧（见 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)）
 2. Sonner 仍用 `next-themes`；应用主题由 `uiStore` 管理
 3. 目录监听仅前端防抖（`useDirWatcher`）
-4. >10MB 直接拒绝（P3+ 分片/只读未做）
 
 ---
 

@@ -70,7 +70,7 @@ Tauri Builder 的事实入口：
 
 `src-tauri/src/commands/`
 
-- `file_ops.rs`：读写文件、10MB 限制、编码和换行处理。
+- `file_ops.rs`：读写文件、10MB 限制、编码和换行处理（>10MB 直接拒绝）。
 - `dir_ops.rs`：读取目录树。
 - `watch_ops.rs`：notify watcher，发 `dir-changed`。
 - `session_ops.rs`：`session.json` 和 `session.preview.json`。
