@@ -74,6 +74,7 @@ export type MessageKey =
   | "tab.closeLeft"
   | "tab.closeRight"
   | "tab.closeAll"
+  | "tab.closeSaved"
   | "tab.scrollLeft"
   | "tab.scrollRight"
   | "status.lineCol"
@@ -162,6 +163,7 @@ const zhCN: Record<MessageKey, string> = {
   "tab.closeLeft": "关闭左侧所有",
   "tab.closeRight": "关闭右侧所有",
   "tab.closeAll": "关闭所有",
+  "tab.closeSaved": "关闭所有已保存的",
   "tab.scrollLeft": "向左滚动标签",
   "tab.scrollRight": "向右滚动标签",
   "status.lineCol": "行 {line}，列 {col}",
@@ -253,6 +255,7 @@ const enUS: Record<MessageKey, string> = {
   "tab.closeLeft": "Close tabs to the left",
   "tab.closeRight": "Close tabs to the right",
   "tab.closeAll": "Close all tabs",
+  "tab.closeSaved": "Close saved tabs",
   "tab.scrollLeft": "Scroll tabs left",
   "tab.scrollRight": "Scroll tabs right",
   "status.lineCol": "Ln {line}, Col {col}",

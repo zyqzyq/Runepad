@@ -204,6 +204,10 @@ export function TabBar(): JSX.Element {
     requestCloseTabs(ids);
   };
 
+  const savedTabIds = tabs
+    .filter((item) => !item.isDirty)
+    .map((item) => item.id);
+
   return (
     <div className="flex h-8 shrink-0 bg-background">
       {canScrollLeft && (
@@ -293,6 +297,12 @@ export function TabBar(): JSX.Element {
                   onClick={() => closeTabsByIds(rightTabIds)}
                 >
                   {t("tab.closeRight")}
+                </ContextMenuItem>
+                <ContextMenuItem
+                  disabled={savedTabIds.length === 0}
+                  onClick={() => closeTabsByIds(savedTabIds)}
+                >
+                  {t("tab.closeSaved")}
                 </ContextMenuItem>
                 <ContextMenuItem onClick={() => closeTabsByIds(allTabIds)}>
                   {t("tab.closeAll")}
